@@ -5,9 +5,11 @@ import WordCard from './WordCard'
 
 interface Props{
     data:WordItem[];
+    onDelete:(id:string) => void;
+    
 }
 
-const WordList:React.FC<Props> = ({data}) => {
+const WordList:React.FC<Props> = ({data,onDelete}) => {
     return (
         <div style={{
             height:'80vh',
@@ -31,7 +33,7 @@ const WordList:React.FC<Props> = ({data}) => {
                 data={data}
                 itemContent={(index, item) => {
                     // 直接渲染我们的砖块组件，代码极其干净！
-                    return <WordCard item={item} />;
+                    return <WordCard item={item} onDelete={onDelete} />;
                 }}
             />
         </div>

@@ -13,7 +13,7 @@ export const generateWords = (count:number):WordItem[] => {
 
         
         const word:WordItem = {
-            id:i,
+            id:i.toString(),
             en:`word_${randomEn}`,
             cn:`模拟数据${i}`,
             level:randomLevel,

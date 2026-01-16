@@ -1,7 +1,7 @@
 export type WordLevel = '高考' | '四级' | '六级' | '雅思'
 
 export interface WordItem {
-    id:number;
+    id:string;
     en:string;
     cn:string;
     level:WordLevel;

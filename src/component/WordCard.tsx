@@ -1,14 +1,14 @@
 import React from 'react';
-import { Tag, Badge } from 'antd';
-import { CheckCircleOutlined,ClockCircleOutlined } from '@ant-design/icons';
+import { Tag, Badge,Button } from 'antd';
+import { CheckCircleOutlined,ClockCircleOutlined,DeleteOutlined } from '@ant-design/icons';
 import {type WordItem } from '../types';
 
 interface Props {
     item:WordItem; 
-
+    onDelete: (id:string) => void;
 }
 
-const WordCard:React.FC<Props> =  ({item}) =>{
+const WordCard:React.FC<Props> =  ({item,onDelete}) =>{
 
     const getLevelColor = (level: string) => {
         switch(level) {
@@ -44,12 +44,15 @@ const WordCard:React.FC<Props> =  ({item}) =>{
                 <div  style={{display:'flex',alignItems:'center',gap:'8px'}}>
                     <Tag color={getLevelColor(item.level)}>{item.level}</Tag>
 
+                    
                     {/* 状态显示 */}
                     {item.status === '已背' ? (
                         <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '16px' }} />
                     ) : (
                         <ClockCircleOutlined style={{ color: '#faad14', fontSize: '16px' }} />
                     )}
+
+                    <Button icon={<DeleteOutlined/>} onClick={() => onDelete(item.id)}></Button>
                 </div>
             </div>
 
