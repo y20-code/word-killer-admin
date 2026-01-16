@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Badge,Button } from 'antd';
+import { Tag, Button} from 'antd';
 import { CheckCircleOutlined,ClockCircleOutlined,DeleteOutlined } from '@ant-design/icons';
 import {type WordItem } from '../types';
 

@@ -1,6 +1,5 @@
 import {useState, useEffect} from 'react';
 import { generateWords } from './utils/mock';
-
 import {type WordItem } from './types';
 import WordList from './component/WordList';
 import WordForm  from './component/WordForm';
@@ -38,7 +37,7 @@ const App = () => {
 
           <WordForm onAdd={handleAdd}/>
             
-            <WordList data={words} onDelete={handleDelete} />
+          <WordList data={words} onDelete={handleDelete} />
         </div>)
 };
 
