@@ -7,7 +7,7 @@ export const generateWords = (count:number):WordItem[] => {
     const result:WordItem[] = []
     for(let i = 0;i < count;i++){
         
-        const randomEn = Math.random().toString(36).substring;
+        const randomEn = Math.random().toString(36).substring(7);
         const randomLeveIndex = Math.floor(Math.random() * level.length)
         const randomLevel =  level[randomLeveIndex]
 
