@@ -5,6 +5,7 @@ import { generateWords } from './utils/mock';
 import {type WordItem } from './types';
 import WordList from './component/WordList';
 import WordForm  from './component/WordForm';
+import EditModal from './component/EditModal';
 
 const App = () => {
 
@@ -14,6 +15,10 @@ const App = () => {
 
   const [keyword,setKeyword] = useState('');
   const [filterLevel,setFilterLevel] = useState('all')
+
+  const [currentProto,setcurrentProto] = useState<WordItem | null>(null)
+
+  const [isModalOpen,setIsModalOpen] = useState(false)
 
   const filterWords = useMemo(() =>{
 
@@ -77,6 +82,31 @@ const App = () => {
     setWords(prev => [item,...prev])
   }
 
+  const handerUpdate = (id:string,updatedItem:WordItem) =>{
+    return setWords(prev => prev.map(item =>{
+
+      if(item.id === id){
+        return {...item,...updatedItem}
+      }
+      return item;
+    }))
+  }
+
+  const handleEditClick = (item:WordItem) => {
+    setcurrentProto(item);
+    setIsModalOpen(true);
+  }
+
+  const handleToggle = (id:string) => {
+    return setWords(prev => prev.map(item => {
+      if(item.id ===id){
+        const newStatus = item.status === '已背' ? '未背':'已背';
+        return {...item, status:newStatus}
+      }
+      return item;
+    }))
+  }
+
 
   return (<div style={{ 
             padding: '40px', 
@@ -117,8 +147,15 @@ const App = () => {
             <Button onClick={handleRemoveAll}>重置数据</Button>
             </Space>
           </Card>
+
+          <EditModal 
+            isOpen={isModalOpen}
+            currentWord={currentProto}
+            onClose={() => setIsModalOpen(false)}
+            onUpdate={handerUpdate}
+          />
             
-          <WordList data={filterWords} onDelete={handleDelete} />
+          <WordList data={filterWords} onDelete={handleDelete} onEdit={handleEditClick} />
         </div>)
 };
 
