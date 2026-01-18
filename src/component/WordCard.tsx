@@ -1,7 +1,10 @@
 import React from 'react';
 import { Tag, Button} from 'antd';
-import { CheckCircleOutlined,ClockCircleOutlined,DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined,ClockCircleOutlined,DeleteOutlined, EditOutlined, HolderOutlined } from '@ant-design/icons';
 import {type WordItem } from '../types';
+
+import {useSortable} from '@dnd-kit/sortable';
+import {CSS} from '@dnd-kit/utilities'
 
 interface Props {
     item:WordItem; 
@@ -11,6 +14,24 @@ interface Props {
 
 const WordCard:React.FC<Props> =  ({item,onDelete,onEdit}) =>{
 
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition
+    } = useSortable({id :item.id});
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        // 加点样式：padding 等原有的保持不变
+        padding: '12px 20px',
+        borderBottom: '1px solid #f0f0f0',
+        background: '#fff',
+        marginBottom: '8px', // 加点间距方便看拖拽效果
+        borderRadius: '4px',
+    };
 
     const getLevelColor = (level: string) => {
         switch(level) {
@@ -24,16 +45,14 @@ const WordCard:React.FC<Props> =  ({item,onDelete,onEdit}) =>{
 
     return (
         <div
-            style={{
-                padding:'12px 20px',
-                borderBottom:'1px solid #f0f0f0',
-                background:'#fff',
-                transition:'all 0.3s',
-                cursor:'pointer'
-            }}
+            ref={setNodeRef}
+            style={style}
             className="word-card-hover"
         >
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:"center"}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:"center",gap:12}}>
+                <div {...attributes} {...listeners} style={{cursor:'grab'}}>
+                    <HolderOutlined/>
+                </div>
                 <div>
                     <div style={{fontSize:'18px',fontWeight:'bold',color:'#1f1f1f'}}>
                         {item.en}

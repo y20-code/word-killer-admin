@@ -2,6 +2,10 @@ import {useState, useEffect,useMemo} from 'react';
 import { Card,Input,message,Radio,Space,Button } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { generateWords } from './utils/mock';
+
+import {type DragEndEvent } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+
 import {type WordItem } from './types';
 
 import WordList from './component/WordList';
@@ -29,7 +33,7 @@ const App = () => {
   const [isModalOpen,setIsModalOpen] = useState(false)
 
   const filterWords = useMemo(() =>{
-    
+
     const lowerKeyword = debouncedKeyWord.trim().toLowerCase();
 
     return words.filter(item => {
@@ -46,7 +50,7 @@ const App = () => {
 
   useEffect(() =>{
     if(words.length === 0){
-      const mocks = generateWords(20000);
+      const mocks = generateWords(20);
       setWords(mocks);
     }
   },[])
@@ -94,6 +98,23 @@ const App = () => {
       return item;
     }))
   }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event; // active: 被拖的人, over: 被撞的人
+
+    // 如果 over 存在，且 dragged 确实换了位置
+    if (over && active.id !== over.id) {
+        setWords((items) => {
+            // 找到旧位置的索引
+            const oldIndex = items.findIndex((item) => item.id === active.id);
+            // 找到新位置的索引
+            const newIndex = items.findIndex((item) => item.id === over.id);
+
+            // 使用 dnd-kit 提供的 arrayMove 重新排序
+            return arrayMove(items, oldIndex, newIndex);
+        });
+    }
+};
 
 
   return (<div style={{ 
@@ -143,7 +164,7 @@ const App = () => {
             onUpdate={handerUpdate}
           />
             
-          <WordList data={filterWords} onDelete={handleDelete} onEdit={handleEditClick} />
+          <WordList data={filterWords} onDelete={handleDelete} onEdit={handleEditClick} onDragEnd={handleDragEnd}/>
         </div>)
 };
 

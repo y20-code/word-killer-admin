@@ -1,15 +1,20 @@
 import React from 'react';
-import { Virtuoso } from 'react-virtuoso';
+// import { Virtuoso } from 'react-virtuoso';
 import {type WordItem } from '../types';
 import WordCard from './WordCard'
+
+
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 interface Props{
     data:WordItem[];
     onDelete:(id:string) => void;
     onEdit: (item:WordItem) => void;
+    onDragEnd: (event: DragEndEvent) => void;
 }
 
-const WordList:React.FC<Props> = ({data,onDelete,onEdit}) => {
+const WordList:React.FC<Props> = ({data,onDelete,onEdit,onDragEnd}) => {
     return (
         <div style={{
             height:'80vh',
@@ -28,14 +33,25 @@ const WordList:React.FC<Props> = ({data,onDelete,onEdit}) => {
                 📚 单词总库 (共 {data.length.toLocaleString()} 个)
             </div>
 
-            <Virtuoso
-                style={{ height: 'calc(100% - 55px)' }} // 减去顶栏的高度
-                data={data}
-                itemContent={(index, item) => {
-                    // 直接渲染我们的砖块组件，代码极其干净！
-                    return <WordCard item={item} onDelete={onDelete} onEdit={onEdit}/>;
-                }}
-            />
+            {/* <Virtuoso */}
+            <DndContext
+                collisionDetection={closestCenter}
+                onDragEnd={onDragEnd}
+            >   
+                <SortableContext
+                    items={data.map(item => item.id)}
+                    strategy={verticalListSortingStrategy}
+                >
+                    {data.map(item => (
+                        <WordCard
+                            key={item.id}
+                            item={item}
+                            onDelete={onDelete}
+                            onEdit={onEdit}
+                        />
+                    ))}
+                </SortableContext>
+            </DndContext>
         </div>
     )
 }

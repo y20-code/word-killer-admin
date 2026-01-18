@@ -1,73 +1,29 @@
-# React + TypeScript + Vite
+# ⚔️ Word Killer Admin (单词杀手后台)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> 一个基于 React + TypeScript + Ant Design 的高性能单词管理系统。
+> 模拟大厂中后台开发流程，具备高性能渲染和极致的用户体验。
 
-Currently, two official plugins are available:
+## 🛠 技术栈 (Tech Stack)
+- **核心框架**: React 18, TypeScript, Vite
+- **UI 组件**: Ant Design
+- **性能优化**: React Virtuoso (虚拟列表), useMemo (筛选缓存), useDebounce (搜索防抖)
+- **数据管理**: Custom Hooks (useLocalStorage 封装)
+- **代码规范**: ESLint, Prettier, Git Commit Standard
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ 已实现功能 (Features)
+1. **高性能列表**: 支持 20,000+ 条数据的丝滑滚动 (Virtual Scroll)。
+2. **数据持久化**: 刷新页面不丢失数据，自动同步 LocalStorage。
+3. **智能搜索**: 支持中英文混合搜索，通过防抖减少计算消耗。
+4. **全功能编辑**:
+   - 新增：UUID 自动生成，表单校验。
+   - 删除：乐观 UI 更新。
+   - 修改：支持弹窗回显，无感更新。
+5. **极简代码**: 封装 `useLocalStorage` 等 Hook，业务逻辑与 UI 分离。
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📂 目录结构 (Structure)
+src/
+├── components/    # 原子组件 (WordCard, WordForm, EditModal)
+├── hooks/         # 自定义钩子 (useLocalStorage, useDebounce)
+├── types/         # TS 类型定义 (WordItem)
+├── utils/         # 工具函数 (mock数据生成)
+└── App.tsx        # 主入口
