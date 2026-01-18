@@ -3,17 +3,25 @@ import { Card,Input,message,Radio,Space,Button } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { generateWords } from './utils/mock';
 import {type WordItem } from './types';
+
 import WordList from './component/WordList';
 import WordForm  from './component/WordForm';
 import EditModal from './component/EditModal';
+
+import { useLocalStorage } from './hooks/useLocalStorage';
+import { useDebounce } from './hooks/useDebounce';
 
 const App = () => {
 
   const CACHE_KEY = 'word_killer_data';
 
-  const [words,setWords] = useState<WordItem[]>([])
+  const [words,setWords] = useLocalStorage<WordItem[]>(CACHE_KEY,[]);
 
+  
   const [keyword,setKeyword] = useState('');
+
+  const debouncedKeyWord = useDebounce(keyword,300)
+
   const [filterLevel,setFilterLevel] = useState('all')
 
   const [currentProto,setcurrentProto] = useState<WordItem | null>(null)
@@ -21,47 +29,27 @@ const App = () => {
   const [isModalOpen,setIsModalOpen] = useState(false)
 
   const filterWords = useMemo(() =>{
+    
+    const lowerKeyword = debouncedKeyWord.trim().toLowerCase();
 
     return words.filter(item => {
       const isLevelMatch = filterLevel === 'all' || item.level === filterLevel;
-
-      const lowerKeyword = keyword.trim().toLowerCase();
+      
       const lowerWord = item.en.toLowerCase();
 
       const isKeywordMatch  = lowerWord.includes(lowerKeyword) || item.cn.includes(lowerKeyword);
 
       return isLevelMatch && isKeywordMatch;
     })
-  },[words,keyword,filterLevel])
+  },[words,debouncedKeyWord,filterLevel])
+  
 
-  useEffect(() => {
-    
-    const cache = localStorage.getItem(CACHE_KEY);
-
-    if(cache){
-      try{
-        const data = JSON.parse(cache);
-        setWords(data)
-        console.log('读取缓存成功')
-      } catch (error) {
-        console.error('缓存数据损坏，重新生成...', error);
-        const data = generateWords(20000);
-        setWords(data);
-      }
-    }else{
-      console.log('正在生成')
-      const data = generateWords(10000);
-      setWords(data);
-      console.log("数据工厂产出:" ,data)
+  useEffect(() =>{
+    if(words.length === 0){
+      const mocks = generateWords(20000);
+      setWords(mocks);
     }
   },[])
-
-  useEffect(() => {
-    if(words.length>0){
-      localStorage.setItem(CACHE_KEY,JSON.stringify(words))
-      // message.success("数据保存成功")
-    }
-  },[words])
 
   const handleRemoveAll = () =>{
     localStorage.removeItem(CACHE_KEY)
