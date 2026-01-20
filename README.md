@@ -5,7 +5,7 @@
 
 ## 🛠 技术栈 (Tech Stack)
 - **核心框架**: React 18, TypeScript, Vite
-- **UI 组件**: Ant Design
+- **UI 组件**: Ant Design,ECharts, Dnd-kit
 - **性能优化**: React Virtuoso (虚拟列表), useMemo (筛选缓存), useDebounce (搜索防抖)
 - **数据管理**: Custom Hooks (useLocalStorage 封装)
 - **代码规范**: ESLint, Prettier, Git Commit Standard
@@ -19,10 +19,11 @@
    - 删除：乐观 UI 更新。
    - 修改：支持弹窗回显，无感更新。
 5. **极简代码**: 封装 `useLocalStorage` 等 Hook，业务逻辑与 UI 分离。
+6. **图表展示**: 用饼图显示词表构成，和掌握率。
 
 ## 📂 目录结构 (Structure)
 src/
-├── components/    # 原子组件 (WordCard, WordForm, EditModal)
+├── components/    # 原子组件 (WordCard, WordForm, EditModal,StatisticsChart)
 ├── hooks/         # 自定义钩子 (useLocalStorage, useDebounce)
 ├── types/         # TS 类型定义 (WordItem)
 ├── utils/         # 工具函数 (mock数据生成)

@@ -11,6 +11,7 @@ import {type WordItem } from './types';
 import WordList from './component/WordList';
 import WordForm  from './component/WordForm';
 import EditModal from './component/EditModal';
+import StatisticsChart from './component/StatisTicsChart'
 
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useDebounce } from './hooks/useDebounce';
@@ -129,6 +130,8 @@ const App = () => {
             </h1>
 
           <WordForm onAdd={handleAdd}/>
+
+          <StatisticsChart data={words} />
 
           <Card 
             style={{marginBottom:20}}
