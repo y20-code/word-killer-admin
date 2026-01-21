@@ -12,9 +12,10 @@ interface Props{
     onDelete:(id:string) => void;
     onEdit: (item:WordItem) => void;
     onDragEnd: (event: DragEndEvent) => void;
+    onToggle: (id:string) => void;
 }
 
-const WordList:React.FC<Props> = ({data,onDelete,onEdit,onDragEnd}) => {
+const WordList:React.FC<Props> = ({data,onDelete,onEdit,onDragEnd,onToggle}) => {
     return (
         <div style={{
             height:'80vh',
@@ -48,6 +49,7 @@ const WordList:React.FC<Props> = ({data,onDelete,onEdit,onDragEnd}) => {
                             item={item}
                             onDelete={onDelete}
                             onEdit={onEdit}
+                            onToggle={onToggle}
                         />
                     ))}
                 </SortableContext>

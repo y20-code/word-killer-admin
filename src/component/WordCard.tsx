@@ -9,10 +9,11 @@ import {CSS} from '@dnd-kit/utilities'
 interface Props {
     item:WordItem; 
     onDelete: (id:string) => void;
-    onEdit: (item:WordItem) => void
+    onEdit: (item:WordItem) => void;
+    onToggle:(id:string) => void;
 }
 
-const WordCard:React.FC<Props> =  ({item,onDelete,onEdit}) =>{
+const WordCard:React.FC<Props> =  ({item,onDelete,onEdit,onToggle}) =>{
 
     const {
         attributes,
@@ -68,9 +69,9 @@ const WordCard:React.FC<Props> =  ({item,onDelete,onEdit}) =>{
                     
                     {/* 状态显示 */}
                     {item.status === '已背' ? (
-                        <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '16px' }} />
+                        <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '16px' }} onClick={() => onToggle(item.id)}/>
                     ) : (
-                        <ClockCircleOutlined style={{ color: '#faad14', fontSize: '16px' }} />
+                        <ClockCircleOutlined style={{ color: '#faad14', fontSize: '16px' }} onClick={() => onToggle(item.id)}/>
                     )}
 
                     <Button icon={<EditOutlined/>} onClick={() => onEdit(item)}>编辑</Button>

@@ -137,13 +137,13 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
 
     return (
         <Row gutter={16} style={{ marginBottom: 20 }}>
-            <Col span={12}>
+            <Col xs={24} md={12}>
                 <Card hoverable>
                     {/* 渲染第一个图 */}
                     <ReactECharts option={levelOption} style={{ height: 300 }} />
                 </Card>
             </Col>
-            <Col span={12}>
+            <Col xs={24} md={12}>
                 <Card hoverable>
                     {/* 渲染第二个图 */}
                     <ReactECharts option={progressOption} style={{ height: 300 }} />
