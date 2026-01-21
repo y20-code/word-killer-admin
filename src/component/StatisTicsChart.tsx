@@ -20,6 +20,8 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
 
         let masteredCount = 0;
 
+        const addedDateCountMap:Record<string,number> ={};
+
         data.forEach(item => {
             if(levelMap[item.level] !== undefined) {
                 levelMap[item.level]++;
@@ -27,6 +29,14 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
 
             if(item.status === '已背')
                 masteredCount++;
+
+            const date = item.addedDate;
+
+             if(addedDateCountMap[date] !== undefined){
+                addedDateCountMap[date]++;
+            }else{
+                addedDateCountMap[date] = 1;
+            }
         })
 
         const pieData = Object.keys(levelMap).map(key => ({
@@ -34,17 +44,33 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
             value:levelMap[key]
         }))
 
-        return {pieData,masteredCount,total:data.length};
+        const last7Days = [];
+        const countData = [];
 
-    },data)
+        for(let i = 6 ;i >=0;i--){
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+
+            const year = d.getFullYear();
+            const month =(d.getMonth() + 1).toString().padStart(2,'0')
+            const day = d.getDate().toString().padStart(2,'0');
+            const dateStr = `${year}-${month}-${day}`;
+
+            last7Days.push(dateStr); 
+
+            countData.push(addedDateCountMap[dateStr] || 0);
+        }
+
+        return {pieData,masteredCount,total:data.length,last7Days,countData};
+
+    },[data])
 
     const levelOption = {
         title:{
             text:'词库构成',
-            left:'cneter',
+            left:'center',
             textStyle:{fontSize:16}
         },
-
         tooltip:{trigger:'item'},
         legend:{bottom:'0'},
         series:[
@@ -54,7 +80,7 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
                 radius:['40%','70%'],
                 avoidLabelOverlap:false,
                 itemStyle:{
-                    borerRadius:10,
+                    borderRadius:10,
                     borderColor:'#fff',
                     borderWidth:2
                 },
@@ -83,6 +109,32 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
         ]
     }
 
+    const lineChartOption ={
+        title:{
+            text:'新增单词趋势（近7天）',
+            left:'center',
+            textStyle:{fontSize:16}
+        },
+        tooltip:{
+            trigger:'axis'
+        },
+        xAxis:{
+            type:'category',
+            data:chartData.last7Days,
+        },
+        yAxis:{
+            type:'value',
+            minInterval:1
+        },
+        series:[{
+            data:chartData.countData,
+            type:'line',
+            smooth:true,
+            areaStyle:{}
+            }]
+    };
+
+
     return (
         <Row gutter={16} style={{ marginBottom: 20 }}>
             <Col span={12}>
@@ -95,6 +147,11 @@ const StatisticsChart:React.FC<Props> = ({data}) =>{
                 <Card hoverable>
                     {/* 渲染第二个图 */}
                     <ReactECharts option={progressOption} style={{ height: 300 }} />
+                </Card>
+            </Col>
+            <Col span={24}> {/* 占满整行 */}
+                <Card hoverable style={{ marginTop: 20 }}>
+                    <ReactECharts option={lineChartOption} style={{ height: 300 }} />
                 </Card>
             </Col>
         </Row>

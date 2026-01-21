@@ -2,6 +2,7 @@ import React from 'react';
 import {v4 as uuid} from 'uuid';
 import {Form,Button,message,Input,Select} from 'antd';
 import {type WordItem } from '../types';
+import { getTodayStr } from '../utils';
 
 interface Props{
     onAdd:(item:WordItem) => void;
@@ -18,7 +19,7 @@ const WordFrom:React.FC<Props> = ({onAdd})=> {
             cn:value.cn,
             level:value.level,
             status:'未背',
-            addedDate:new Date().toLocaleDateString(),
+            addedDate:getTodayStr(),
         }
 
         onAdd(item);

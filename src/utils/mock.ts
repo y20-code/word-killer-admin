@@ -1,4 +1,5 @@
 import type{ WordItem, WordLevel } from "../types";
+import { getTodayStr } from "../utils";
 
 
 const level = ['高考','四级','六级','雅思'] as const
@@ -18,7 +19,7 @@ export const generateWords = (count:number):WordItem[] => {
             cn:`模拟数据${i}`,
             level:randomLevel,
             status:'未背',
-            addedDate:new Date().toLocaleDateString()
+            addedDate:getTodayStr()
         };
 
         result.push(word)
