@@ -19,12 +19,13 @@
    - 删除：乐观 UI 更新。
    - 修改：支持弹窗回显，无感更新。
 5. **极简代码**: 封装 `useLocalStorage` 等 Hook，业务逻辑与 UI 分离。
-6. **图表展示**: 用饼图显示词表构成，和掌握率。
+6. **图表展示**: 用饼图显示词表构成、掌握率,7天内单词的添加数。
+7. **上传下载**: 用WebAPI 完成单词列表的上传和下载
 
 ## 📂 目录结构 (Structure)
 src/
 ├── components/    # 原子组件 (WordCard, WordForm, EditModal,StatisticsChart)
-├── hooks/         # 自定义钩子 (useLocalStorage, useDebounce)
+├── hooks/         # 自定义钩子 (index,useLocalStorage, useDebounce，useWordManager,useFileHandler)
 ├── types/         # TS 类型定义 (WordItem)
 ├── utils/         # 工具函数 (mock数据生成)
 └── App.tsx        # 主入口

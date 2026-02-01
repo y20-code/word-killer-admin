@@ -54,7 +54,7 @@ const WordCard:React.FC<Props> =  ({item,onDelete,onEdit,onToggle}) =>{
                 <div {...attributes} {...listeners} style={{cursor:'grab'}}>
                     <HolderOutlined/>
                 </div>
-                <div>
+                <div style={{width:100}}>
                     <div style={{fontSize:'18px',fontWeight:'bold',color:'#1f1f1f'}}>
                         {item.en}
                     </div>
