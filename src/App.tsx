@@ -1,15 +1,18 @@
-import React from 'react';
+import React,{Suspense} from 'react';
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { type DragEndEvent } from '@dnd-kit/core';
+import {Spin} from 'antd';
 
-import {Dashboard ,WordBook} from './pages'
+// import {Dashboard ,WordBook} from './pages'
 
 import AppLayout from './component/AppLayout';
 
 
 import { useWordManager, useFileHandler } from './hooks';
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const WordBook = React.lazy(() => import('./pages/WordBook'));
 
 const App = () => {
 
@@ -40,25 +43,31 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<AppLayout/>}>
-          <Route index element={<Dashboard words={words} />} />
+      <Suspense fallback={
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>
+            <Spin size='large' tip="系统加载中..."/>
+        </div>
+      }>
+        <Routes>
+          <Route path='/' element={<AppLayout/>}>
+            <Route index element={<Dashboard words={words} />} />
 
-          <Route path="words" element={
-            <WordBook
-              words={words}
-              handleAdd={handleAdd}
-              handleDelete={handleDelete}
-              handleUpdate={handleUpdate}
-              handleToggle={handleToggle}
-              handleReset={handleReset}
-              handleDragEnd={handleDragEnd}
-              handleExport={handleExport}
-              handleImport={handleImport}
-            />
-          } />
-        </Route>
-      </Routes>
+            <Route path="words" element={
+              <WordBook
+                words={words}
+                handleAdd={handleAdd}
+                handleDelete={handleDelete}
+                handleUpdate={handleUpdate}
+                handleToggle={handleToggle}
+                handleReset={handleReset}
+                handleDragEnd={handleDragEnd}
+                handleExport={handleExport}
+                handleImport={handleImport}
+              />
+            } />
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 
