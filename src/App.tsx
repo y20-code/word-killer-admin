@@ -19,7 +19,7 @@ const App = () => {
   const {
     words, handleAdd, handleDelete, handleUpdate,
     handleToggle, handleDragSort, handleReset,
-    overwriteWords
+    overwriteWords,loading
 
   } = useWordManager();
 
@@ -55,6 +55,7 @@ const App = () => {
             <Route path="words" element={
               <WordBook
                 words={words}
+                loading={loading}
                 handleAdd={handleAdd}
                 handleDelete={handleDelete}
                 handleUpdate={handleUpdate}

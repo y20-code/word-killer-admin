@@ -1,61 +1,99 @@
 import { useLocalStorage } from "./useLocalStorage";
 import {type WordItem } from "../types";
 import { generateWords } from "../utils/mock";
-import {useEffect} from 'react';
+import {useEffect,useState} from 'react';
 import {message} from 'antd';
 import {arrayMove} from '@dnd-kit/sortable'
 
+import api from '../api/request';
+
 export const useWordManager = () => {
     const CACHE_KEY = 'word_killer_data';
-    const [words,setWords] = useLocalStorage<WordItem[]>(CACHE_KEY,[]);
+    const [words,setWords] = useState<WordItem[]>([]);
+    const [loading,setLoading] = useState(false);
+
+
+    const fetchWords = async () => {
+        setLoading(true);
+        try{
+            const data = await api.get<any,WordItem[]>('/words');
+            setWords(data);
+        } catch (error) {
+            console.error('获取列表失败',error)
+        } finally{
+            setLoading(false)
+        }
+    }
 
     useEffect(() =>{
-        if(words.length === 0) {
-            setWords(generateWords(20));
-        }
+        fetchWords();
     },[]);
 
     // 增
-    const handleAdd = (item:WordItem) =>{
-        setWords(prev => [item,...prev]);
+    const handleAdd = async (item:WordItem) =>{
+        try {
+            await api.post('/words',item);
+            message.success('添加成功');
+            fetchWords();
+        } catch(error){
+            console.log(error)
+        }
     }
 
     // 删
-    const handleDelete =(id:string) => {
-        setWords(prev => prev.filter(item => item.id !== id))
+    const handleDelete = async (id:string) => {
+        try {
+            await api.delete(`/words/${id}`);
+            message.success('删除成功');
+            fetchWords();
+        } catch(error){
+            console.error(error)
+        }
     };
 
     // 改（全量)
-    const handleUpdate = (id:string,updateItem:WordItem) =>{
-        setWords(prev => prev.map(item => item.id ===id ? {...item,...updateItem} : item))
+    const handleUpdate = async (id:string,updateItem:WordItem) =>{
+        try {
+            await api.put(`/words/${id}`,updateItem);
+            message.success('修改成功');
+            fetchWords()
+        }catch(error){
+            console.error(error)
+        }
     }
 
     // 改(状态切换)
     const handleToggle = (id:string) => {
-        setWords(prev => prev.map(item => 
-            item.id === id ? {...item,status:item.status === '已背' ? '未背':'已背'}:item
-        ))
+        const target = words.find(w => w.id === id);
+        if(!target) return;
+        const newStatus = target.status === '已背' ? '未背' : '已背';
+
+        handleUpdate(id, { ...target, status: newStatus });
     }
 
     // 拖拽排序
     const handleDragSort = (oldIndex:number,newIndex:number) => {
-        setWords(items => arrayMove(items,oldIndex,newIndex));
+        const newWords = [...words];
+        const [removed] = newWords.splice(oldIndex, 1);
+        newWords.splice(newIndex, 0, removed);
+        setWords(newWords);
     }
 
     //重置
     const handleReset = () => {
-        localStorage.removeItem(CACHE_KEY);
-        message.success('重置中...');
-        setTimeout(() => window.location.reload(),1000);
+        fetchWords();
+        message.info('数据已刷新');
     }
 
     // 导入数据 (覆盖)
     const overwriteWords = (newWords: WordItem[]) => {
         setWords(newWords);
+        message.warning('注意：导入的数据暂时只保存在本地，刷新会消失（需后端支持批量导入接口）');
     }
 
     return {
         words,
+        loading,
         handleAdd,
         handleDelete,
         handleUpdate,

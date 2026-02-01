@@ -14,10 +14,11 @@ interface Props {
     handleReset: () => void;
     handleExport: () => void;
     handleImport: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    loading?:boolean;
 }
 
 const WordBook: React.FC<Props> = ({
-    words, handleAdd, handleDelete, handleUpdate,
+    words,loading,handleAdd, handleDelete, handleUpdate,
     handleToggle, handleDragEnd, handleReset,
     handleExport, handleImport
 }) => {
@@ -67,6 +68,7 @@ const WordBook: React.FC<Props> = ({
                 onEdit={handleEditClick} 
                 onDragEnd={handleDragEnd} 
                 onToggle={handleToggle}
+                loading={loading}
             />
 
             <EditModal 
