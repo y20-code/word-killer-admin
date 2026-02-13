@@ -30,8 +30,8 @@ const Dashboard: React.FC<Props> = ({ words }) => {
 
             <Row gutter={16} style={{ marginBottom: 24 }}>
                 {/* 第一张卡：总词汇量 */}
-                <Col xs={24} sm={8}>
-                    <Card bordered={false} hoverable>
+                <Col xs={24} sm={8} >
+                    <Card bordered={false} hoverable style={{height:150}}>
                         <Statistic 
                             title="单词总储备" 
                             value={stats.total} 
@@ -44,7 +44,7 @@ const Dashboard: React.FC<Props> = ({ words }) => {
 
                 {/* 第二张卡：已掌握 */}
                 <Col xs={24} sm={8}>
-                    <Card bordered={false} hoverable>
+                    <Card bordered={false} hoverable style={{height:150}} >
                         <Statistic 
                             title="已掌握单词" 
                             value={stats.learned} 
@@ -60,7 +60,7 @@ const Dashboard: React.FC<Props> = ({ words }) => {
 
                 {/* 第三张卡：待攻克 */}
                 <Col xs={24} sm={8}>
-                    <Card bordered={false} hoverable>
+                    <Card bordered={false} hoverable style={{height:150}}>
                         <Statistic 
                             title="待攻克" 
                             value={stats.unlearned} 

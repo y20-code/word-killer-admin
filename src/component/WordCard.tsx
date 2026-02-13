@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Button} from 'antd';
+import { Tag, Button,Popconfirm} from 'antd';
 import { CheckCircleOutlined,ClockCircleOutlined,DeleteOutlined, EditOutlined, HolderOutlined } from '@ant-design/icons';
 import {type WordItem } from '../types';
 
@@ -75,8 +75,15 @@ const WordCard:React.FC<Props> =  ({item,onDelete,onEdit,onToggle}) =>{
                     )}
 
                     <Button icon={<EditOutlined/>} onClick={() => onEdit(item)}>编辑</Button>
-
-                    <Button icon={<DeleteOutlined/>} onClick={() => onDelete(item.id)}></Button>
+                    <Popconfirm 
+                        title="确定要删除吗？"
+                        description={`删除的单词是${item.en}`}
+                        okText="确认"
+                        cancelText="取消"
+                        onConfirm={() => onDelete(item.id)}
+                        >
+                        <Button danger icon={<DeleteOutlined/>}  ></Button>
+                    </Popconfirm>
                 </div>
             </div>
 

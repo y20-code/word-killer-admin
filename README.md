@@ -21,11 +21,12 @@
 5. **极简代码**: 封装 `useLocalStorage` 等 Hook，业务逻辑与 UI 分离。
 6. **图表展示**: 用饼图显示词表构成、掌握率,7天内单词的添加数。
 7. **上传下载**: 用WebAPI 完成单词列表的上传和下载
+8. **高性能数据处理** 实现了 **O(n) 时间复杂度** 的扁平数据转树形结构算法 (`List-to-Tree`)，能够瞬间处理万级节点的组织架构数据。
 
 ## 📂 目录结构 (Structure)
 src/
 ├── components/    # 原子组件 (WordCard, WordForm, EditModal,StatisticsChart)
 ├── hooks/         # 自定义钩子 (index,useLocalStorage, useDebounce，useWordManager,useFileHandler)
 ├── types/         # TS 类型定义 (WordItem)
-├── utils/         # 工具函数 (mock数据生成)
+├── utils/         # 工具函数 (mock数据生成);封装了通用的 `treeUtils` 工具库，支持多级菜单、思维导图等业务场景复用。
 └── App.tsx        # 主入口

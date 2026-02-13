@@ -42,12 +42,18 @@ export const useWordManager = () => {
 
     // 删
     const handleDelete = async (id:string) => {
+        setLoading(true)
         try {
             await api.delete(`/words/${id}`);
+            
             message.success('删除成功');
-            fetchWords();
+            // fetchWords();
+            setWords(prev => prev.filter(item => item.id !==id));
         } catch(error){
             console.error(error)
+            message.error("删除失败")
+        }finally{
+            setLoading(false)
         }
     };
 

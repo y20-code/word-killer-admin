@@ -1,0 +1,23 @@
+:root {
+    --bg-body: #f0f2f5;          /* 网页大背景 */
+    --bg-card: #ffffff;          /* 卡片背景 */
+    --text-primary: #000000;     /* 主要文字 */
+    --text-secondary: #666666;   /* 次要文字 */
+    --border-color: #e8e8e8;     /* 边框颜色 */
+    --shadow-color: rgba(0, 0, 0, 0.1); /* 阴影 */
+}
+
+[data-theme='dark'] {
+  --bg-body: #141414;          /* 深灰背景 */
+  --bg-card: #1f1f1f;          /* 卡片深色 */
+  --text-primary: #ffffff;     /* 文字变白 */
+  --text-secondary: #8c8c8c;   /* 次要文字变灰 */
+  --border-color: #303030;     /* 边框变深 */
+  --shadow-color: rgba(0, 0, 0, 0.6);
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s; /* 让切换有过渡动画，显得高级 */
+}
