@@ -1,20 +1,6 @@
 {
   "words": [
     {
-      "en": "adequate",
-      "cn": "adj. 足够的；合格的",
-      "level": "高考",
-      "id": "18"
-    },
-    {
-      "id": "19",
-      "en": "adhere",
-      "cn": "v. 黏附；坚持",
-      "level": "雅思",
-      "status": "未背",
-      "addedDate": "2026-02-04"
-    },
-    {
       "id": "20",
       "en": "adjacent",
       "cn": "adj. 邻近的，毗连的",
@@ -149,6 +135,22 @@
       "level": "高考",
       "status": "未背",
       "addedDate": "2026-02-07"
+    },
+    {
+      "id": "210fd13c-dee1-4ab8-894a-19bf7214daf4",
+      "en": "slice",
+      "cn": "切割",
+      "level": "高考",
+      "status": "未背",
+      "addedDate": "2026-02-21"
+    },
+    {
+      "id": "0804acfa-f9b0-4b0a-a01e-3e452fe83709",
+      "en": "optimistic",
+      "cn": "乐观",
+      "level": "高考",
+      "status": "未背",
+      "addedDate": "2026-02-21"
     }
   ]
 }

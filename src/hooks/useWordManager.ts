@@ -5,11 +5,24 @@ import {useEffect,useState} from 'react';
 import {message} from 'antd';
 import {arrayMove} from '@dnd-kit/sortable'
 
+import { useUndo } from "./useUndo";
+
 import api from '../api/request';
 
 export const useWordManager = () => {
     const CACHE_KEY = 'word_killer_data';
-    const [words,setWords] = useState<WordItem[]>([]);
+    // const [words,setWords] = useState<WordItem[]>([]);
+
+    const {
+        state:words,
+        set: setWords, 
+        undo, 
+        redo, 
+        reset, 
+        canUndo, 
+        canRedo
+    } = useUndo<WordItem[]>([]);
+
     const [loading,setLoading] = useState(false);
 
 
@@ -17,6 +30,7 @@ export const useWordManager = () => {
         setLoading(true);
         try{
             const data = await api.get<any,WordItem[]>('/words');
+            reset(data)
             setWords(data);
         } catch (error) {
             console.error('获取列表失败',error)
@@ -34,7 +48,9 @@ export const useWordManager = () => {
         try {
             await api.post('/words',item);
             message.success('添加成功');
-            fetchWords();
+            // fetchWords();
+
+            setWords([item,...words])
         } catch(error){
             console.log(error)
         }
@@ -43,12 +59,15 @@ export const useWordManager = () => {
     // 删
     const handleDelete = async (id:string) => {
         setLoading(true)
+
+        setWords(words.filter(item => item.id !== id));
+        
         try {
             await api.delete(`/words/${id}`);
             
             message.success('删除成功');
             // fetchWords();
-            setWords(prev => prev.filter(item => item.id !==id));
+            setWords(words.filter(item => item.id !==id));
         } catch(error){
             console.error(error)
             message.error("删除失败")
@@ -59,10 +78,13 @@ export const useWordManager = () => {
 
     // 改（全量)
     const handleUpdate = async (id:string,updateItem:WordItem) =>{
+
+        setWords(words.map(w => w.id === id ? updateItem : w));
+
         try {
             await api.put(`/words/${id}`,updateItem);
             message.success('修改成功');
-            fetchWords()
+            // fetchWords()
         }catch(error){
             console.error(error)
         }
@@ -106,7 +128,12 @@ export const useWordManager = () => {
         handleToggle,
         handleDragSort,
         handleReset,
-        overwriteWords
+        overwriteWords,
+
+        undo,
+        redo,
+        canUndo,
+        canRedo
     };
 
 }

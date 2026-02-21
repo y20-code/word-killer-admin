@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Button } from "antd";
 import { DownloadOutlined, UploadOutlined } from '@ant-design/icons';
+import {useWordContext} from"../contexts/WordContext"
 
 interface Props {
     onImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -10,6 +11,7 @@ interface Props {
 const FileHeader: React.FC<Props> = ({ onImport, onExport }) => {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const {undo,redo,canUndo,canRedo} = useWordContext();
 
     return (
         <div style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
@@ -35,6 +37,11 @@ const FileHeader: React.FC<Props> = ({ onImport, onExport }) => {
             >
                 导入备份
             </Button>
+
+            <Button onClick={undo} disabled={!canUndo}>撤销</Button>
+            <Button onClick={redo} disabled={!canRedo}>重做</Button>
+
+            
         </div>
     )
 }

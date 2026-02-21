@@ -9,6 +9,8 @@ import {Spin} from 'antd';
 
 import AppLayout from './component/AppLayout';
 
+import { WordContext } from './contexts/WordContext';
+
 
 import { useWordManager, useFileHandler } from './hooks';
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
@@ -16,12 +18,8 @@ const WordBook = React.lazy(() => import('./pages/WordBook'));
 
 const App = () => {
 
-  const {
-    words, handleAdd, handleDelete, handleUpdate,
-    handleToggle, handleDragSort, handleReset,
-    overwriteWords,loading
-
-  } = useWordManager();
+  const wordManagerContextValue = useWordManager();
+  const { words, overwriteWords, handleDragSort } = wordManagerContextValue;
 
   const { handleExport, handleImport } = useFileHandler(words, overwriteWords);
 
@@ -40,8 +38,16 @@ const App = () => {
     }
   };
 
+  const finialContextValue ={
+    ...wordManagerContextValue, 
+    handleExport, 
+    handleImport, 
+    handleDragEnd
+  }
+
 
   return (
+    
     <BrowserRouter>
       <Suspense fallback={
         <div style={{display:'flex',justifyContent:'center',alignItems:'center',height:'100vh'}}>
@@ -51,20 +57,11 @@ const App = () => {
         <Routes>
           <Route path='/' element={<AppLayout/>}>
             <Route index element={<Dashboard words={words} />} />
-
+            
             <Route path="words" element={
-              <WordBook
-                words={words}
-                loading={loading}
-                handleAdd={handleAdd}
-                handleDelete={handleDelete}
-                handleUpdate={handleUpdate}
-                handleToggle={handleToggle}
-                handleReset={handleReset}
-                handleDragEnd={handleDragEnd}
-                handleExport={handleExport}
-                handleImport={handleImport}
-              />
+              <WordContext.Provider value={finialContextValue}>
+                <WordBook/>
+              </WordContext.Provider>
             } />
           </Route>
         </Routes>
