@@ -4,6 +4,7 @@ import { generateWords } from "../utils/mock";
 import {useEffect,useState} from 'react';
 import {message} from 'antd';
 import {arrayMove} from '@dnd-kit/sortable'
+import { useCallback } from "react";
 
 import { useUndo } from "./useUndo";
 
@@ -57,29 +58,29 @@ export const useWordManager = () => {
     }
 
     // 删
-    const handleDelete = async (id:string) => {
+    const handleDelete = useCallback(async(id:string) => {
         setLoading(true)
 
-        setWords(words.filter(item => item.id !== id));
+        setWords(prevWords => prevWords.filter(item => item.id !== id));
         
         try {
             await api.delete(`/words/${id}`);
             
             message.success('删除成功');
             // fetchWords();
-            setWords(words.filter(item => item.id !==id));
+            // setWords(words.filter(item => item.id !==id));
         } catch(error){
             console.error(error)
             message.error("删除失败")
         }finally{
             setLoading(false)
         }
-    };
+    },[]);
 
     // 改（全量)
-    const handleUpdate = async (id:string,updateItem:WordItem) =>{
+    const handleUpdate = useCallback(async (id:string,updateItem:WordItem) =>{
 
-        setWords(words.map(w => w.id === id ? updateItem : w));
+        setWords(prevWords => prevWords.map(w => w.id === id ? updateItem : w));
 
         try {
             await api.put(`/words/${id}`,updateItem);
@@ -88,16 +89,16 @@ export const useWordManager = () => {
         }catch(error){
             console.error(error)
         }
-    }
+    },[])
 
     // 改(状态切换)
-    const handleToggle = (id:string) => {
+    const handleToggle = useCallback((id:string) => {
         const target = words.find(w => w.id === id);
         if(!target) return;
         const newStatus = target.status === '已背' ? '未背' : '已背';
 
         handleUpdate(id, { ...target, status: newStatus });
-    }
+    },[])
 
     // 拖拽排序
     const handleDragSort = (oldIndex:number,newIndex:number) => {
@@ -114,9 +115,23 @@ export const useWordManager = () => {
     }
 
     // 导入数据 (覆盖)
-    const overwriteWords = (newWords: WordItem[]) => {
+    const overwriteWords = async (newWords: WordItem[]) => {
         setWords(newWords);
-        message.warning('注意：导入的数据暂时只保存在本地，刷新会消失（需后端支持批量导入接口）');
+        try{
+            //  批量同步给后端
+            // 后端提供一个 /words/batch-import 接口。
+            // 如果你的 mock 后端没有批量接口，我们就用 Promise.all 并发发送 post 请求！
+            message.loading({content:'正在同步到云端...',key:'importSync'});
+
+            await Promise.all(
+                newWords.map(word => api.post('/words',word))
+            );
+
+            message.success({ content: '云端同步成功！刷新再也不会丢了！', key: 'importSync' });
+        }catch (error) {
+            console.error('云端同步失败', error);
+            message.error({ content: '云端同步失败，请检查网络或后端接口', key: 'importSync' });
+        }
     }
 
     return {

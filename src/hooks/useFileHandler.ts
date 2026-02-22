@@ -7,8 +7,15 @@ export const useFileHandler = (
 
   const handleExport = () => {
 
+    if (words.length === 0) {
+      message.warning('当前没有单词可以导出哦!');
+      return;
+    }
+
+    // 1.把你的数组变成格式化好的 JSON 字符串 (最后的 2 代表缩进两个空格)
     const jsonStr = JSON.stringify(words, null, 2)
 
+    // 2.用Blob把字符串“揉"成一个真正的文件对象
     const blob = new Blob([jsonStr], { type: 'application/json' });
 
     const url = URL.createObjectURL(blob);

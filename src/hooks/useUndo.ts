@@ -16,8 +16,17 @@ export const useUndo = <T>(initialPresent:T) => {
     })
 
     //记录最新状态
-    const set = useCallback((newPresent:T) => {
+    const set = useCallback((action:React.SetStateAction<T>) => {
         setState((currentState) => {
+
+            const newPresent = typeof action === 'function'
+                ? (action as (prev:T) => T)(currentState.present) : action;
+
+            // 性能优化防御（可选）：如果算出来的新值和老值一模一样，就不产生多余的历史记录
+            if (newPresent === currentState.present) {
+                return currentState;
+            }
+            
             return {
                 past:[...currentState.past,currentState.present],
                 present:newPresent,
