@@ -1,8 +1,9 @@
-import React from 'react';
+import React,{useMemo} from 'react';
 // import { Virtuoso } from 'react-virtuoso';
 import { Spin,Empty} from 'antd'
 import {type WordItem } from '../types';
-import WordCard from './WordCard'
+import WordCard from './WordCard';
+import { useCallback } from 'react';
 
 
 import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core';
@@ -17,7 +18,16 @@ interface Props{
     loading?:boolean;
 }
 
+
+
 const WordList:React.FC<Props> = ({data,onDelete,onEdit,onDragEnd,onToggle,loading}) => {
+
+    const wordIdsStr = data.map(item => item.id).join(',');
+
+    const sortableItemIds = useMemo(() => {
+        return data.map(item => item.id)
+    },[wordIdsStr])
+
     return (
         <div style={{
             height:'80vh',
@@ -51,7 +61,8 @@ const WordList:React.FC<Props> = ({data,onDelete,onEdit,onDragEnd,onToggle,loadi
                             onDragEnd={onDragEnd}
                         >   
                             <SortableContext
-                                items={data.map(item => item.id)}
+                                // items={data.map(item => item.id)}
+                                items={sortableItemIds}
                                 strategy={verticalListSortingStrategy}
                             >
                                 {data.map(item => (

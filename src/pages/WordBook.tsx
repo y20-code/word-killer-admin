@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { type WordItem } from '../types'
 import { WordList, WordForm, EditModal, FilterBar, FileHeader } from '../component';
 import { useDebounce, } from '../hooks';
@@ -90,10 +90,10 @@ const WordBook: React.FC = () => {
 
     }, [words, debouncedKeyWord, filterLevel, treeData]);
 
-    const handleEditClick = (item: WordItem) => {
+    const handleEditClick = useCallback((item: WordItem) => {
         setcurrentProto(item);
         setIsModalOpen(true)
-    }
+    },[])
 
     return (
         <div>

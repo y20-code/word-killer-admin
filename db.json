@@ -6,7 +6,23 @@
       "cn": "工具箱",
       "level": "高考",
       "status": "未背",
-      "addedDate": "2026-02-22"
+      "addedDate": "2026-02-22",
+      "stateus": "已背"
+    },
+    {
+      "id": "1394e568-75a1-4a6e-9f8c-65657bfbe21d",
+      "en": "collision",
+      "cn": "碰撞",
+      "level": "高考",
+      "status": "未背",
+      "addedDate": "2026-02-22",
+      "stateus": "已背"
+    },
+    {
+      "en": "detectio",
+      "cn": "检测",
+      "level": "高考",
+      "id": "944364bb-6536-40b1-ba2f-af2992fac7de"
     }
   ]
 }

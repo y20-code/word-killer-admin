@@ -93,11 +93,23 @@ export const useWordManager = () => {
 
     // 改(状态切换)
     const handleToggle = useCallback((id:string) => {
-        const target = words.find(w => w.id === id);
-        if(!target) return;
-        const newStatus = target.status === '已背' ? '未背' : '已背';
+        setWords((prevWords) => {
+            const target = prevWords.find(w => w.id === id)
 
-        handleUpdate(id, { ...target, status: newStatus });
+            if(!target) return prevWords;
+
+            const newStats: "未背" | "已背" = target.status === '已背' ? '未背':'已背'
+            const updatedItem = {...target,status:newStats};
+
+            api.put(`/words/${id}`,updatedItem)
+                .then(() => message.success('状态已更新'))
+                .catch((err) => {
+                    console.error(err);
+                    message.error('网络开小差，请稍后再试');
+                })
+
+            return prevWords.map(w => w.id === id ? updatedItem : w);
+        });
     },[])
 
     // 拖拽排序

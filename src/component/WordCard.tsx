@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{memo} from 'react';
 import { Tag, Button,Popconfirm} from 'antd';
 import { CheckCircleOutlined,ClockCircleOutlined,DeleteOutlined, EditOutlined, HolderOutlined } from '@ant-design/icons';
 import {type WordItem } from '../types';
@@ -14,6 +14,8 @@ interface Props {
 }
 
 const WordCard:React.FC<Props> =  ({item,onDelete,onEdit,onToggle}) =>{
+
+    console.log(`WrodCard渲染了:${item.cn}`)
 
     const {
         attributes,
@@ -92,4 +94,4 @@ const WordCard:React.FC<Props> =  ({item,onDelete,onEdit,onToggle}) =>{
     )
 }
 
-export default WordCard;
+export default memo(WordCard);
