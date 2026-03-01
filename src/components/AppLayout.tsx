@@ -39,7 +39,7 @@ const AppLayout: React.FC = () => {
             </Sider>
             <Layout>
                 <Header style={{ padding: 0, background: colorBgContainer, textAlign: 'center', fontSize: '18px', fontWeight: 'bold' }}>
-                    单词杀手后台管理系统
+                    单词后台管理系统
                 </Header>
                 <Content style={{ margin: '24px 16px 0' }}>
                     <div style={{ padding: 24, minHeight: 360, background: colorBgContainer, borderRadius: borderRadiusLG }}>

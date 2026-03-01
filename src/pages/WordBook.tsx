@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { type WordItem } from '../types'
-import { WordList, WordForm, EditModal, FilterBar, FileHeader } from '../component';
+import { WordList, WordForm, EditModal, FilterBar, FileHeader } from '../components';
+import WordNoteEditor from '../components/WordNoteEditor'
 import { useDebounce, } from '../hooks';
+import axios from 'axios';
 
 import {useWordContext} from '../contexts/WordContext'
 
@@ -95,6 +97,25 @@ const WordBook: React.FC = () => {
         setIsModalOpen(true)
     },[])
 
+    const handleSaveNote = async (htmlData: string) => {
+        try {
+            // 💥 目标：8080 端口！把你原来的单词数据和新写的富文本 note 一起发过去
+            // 注意：这里的 URL 和数据结构，要和你上午写的保持一致
+            await axios.put('http://localhost:8080/words/1', {
+            id: "1",           // 替换成真实的单词 ID
+            en: "Abandon",     // 替换成真实的单词
+            cn: "放弃",
+            level: "CET4",
+            status: "未背",
+            note: htmlData     // 🌟 携带了 HTML 源码的核弹体！
+            });
+            alert('🎉 讲义已成功保存到 MySQL 数据库！');
+        } catch (error) {
+            console.error('保存失败:', error);
+            alert('保存失败，请检查后端是否启动！');
+        }
+    };
+
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -120,6 +141,7 @@ const WordBook: React.FC = () => {
                 onToggle={handleToggle}
                 loading={loading}
             />
+            <WordNoteEditor wordEn="Abandon" onSaveNote={handleSaveNote} />
 
             <EditModal
                 isOpen={isModalOpen}

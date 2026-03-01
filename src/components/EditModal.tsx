@@ -26,7 +26,8 @@ const EditModal:React.FC<Props> = ({isOpen,currentWord,onClose,onUpdate}) =>{
     const handleOk = () =>{
         form.validateFields().then(values =>{
             if (currentWord){
-                onUpdate(currentWord.id,values);
+                const completwWord = { ...currentWord,...values};
+                onUpdate(currentWord.id,completwWord);
                 onClose();
             }
         }).catch(info => {

@@ -1,0 +1,61 @@
+// 1. 定义设计系统的全局变量 (Design Tokens)
+:root {
+  --color-bg-main: #F8FAFC; // 页面底层浅灰背景
+  --color-bg-dark: #0F172A; // 导航栏和底部的深色
+  --color-primary: #2563EB; // 主题蓝 (Tailwind 的 blue-600)
+  --color-primary-hover: #1D4ED8;
+  --color-text-main: #0F172A;
+  --color-text-muted: #64748B;
+  --color-text-light: #F8FAFC;
+}
+
+// 2. 基础 Reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+// 3. 全局页面骨架 (替代原来的 min-h-screen flex flex-col)
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden; // 防止背景字母撑爆屏幕
+}
+
+// 4. 背景装饰物 (点阵图与大写字母)
+.bg-decorations {
+  // 点阵背景
+  .dot-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  // 漂浮的半透明大字母
+  .faint-letter {
+    position: absolute;
+    font-weight: 700;
+    color: rgba(226, 232, 240, 0.4); // slate-200/40
+    user-select: none;
+    pointer-events: none;
+    font-size: clamp(8rem, 15vw, 20rem); // 响应式字体缩放
+    line-height: 1;
+
+    &.top-left { top: 5rem; left: -2.5rem; }
+    &.top-right { top: 5rem; right: -2.5rem; }
+    &.bottom-left { bottom: 10rem; left: 25%; }
+    &.bottom-right { bottom: 10rem; right: 25%; }
+  }
+}

@@ -1,0 +1,117 @@
+.dashboard-layout {
+  min-height: 100vh;
+  
+  // 覆盖 Antd 侧边栏的默认深色
+  .ant-layout-sider {
+    background-color: #0F172A;
+  }
+
+  // 侧边栏 Logo 区域
+  .logo-container {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: #1677ff;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .logo-text {
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  }
+}
+
+// 右侧主布局背景
+.dashboard-main {
+  background: #F5F7FA;
+}
+
+// 顶部 Header
+.dashboard-header {
+  background: #fff;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f5f9;
+
+  h4.ant-typography {
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    .bell-icon {
+      font-size: 20px;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .btn-new-task {
+      border-radius: 6px;
+    }
+  }
+}
+
+// 核心内容区
+.dashboard-content {
+  margin: 24px;
+  overflow: initial;
+}
+
+/* ================== 通用卡片样式 ================== */
+.custom-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  height: 100%;
+
+  .ant-card-head-title {
+    font-weight: bold;
+  }
+  
+  // 警报卡片的标题标红
+  &.alert-card .ant-card-head-title {
+    color: #cf1322;
+  }
+}
+
+/* ================== 顶部数据统计块 ================== */
+.stat-card-body {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+
+  h2.ant-typography {
+    margin: 0;
+  }
+
+  // 利用 SCSS 抽离不同状态的头像颜色
+  .avatar-blue { background: #e6f4ff; color: #1677ff; }
+  .avatar-orange { background: #fff7e6; color: #fa8c16; }
+  .avatar-green { background: #f6ffed; color: #52c41a; }
+}
+
+/* ================== 列表自定义样式 ================== */
+.schedule-list, .alert-list {
+  .ant-list-item-meta-title {
+    font-weight: 600;
+  }
+}
+
+.avatar-error { background: #fff1f0; color: #cf1322; }
+.avatar-warning { background: #fffbe6; color: #d48806; }

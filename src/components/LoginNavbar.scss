@@ -1,0 +1,118 @@
+.navbar {
+  display: flex;             // 开启弹性盒
+  align-items: center;       // 垂直方向：绝对居中
+  justify-content: space-between; // 水平方向：核心杀招！左右两端顶格对齐！
+  
+  padding: 1rem 1.5rem;
+  background-color: var(--color-bg-dark); // 用我们在 index.scss 定义的深色变量
+  color: var(--color-text-light);
+  position: relative;
+  z-index: 20; // 保证导航栏压在所有元素的上面
+
+  /* 响应式：当屏幕大于 768px (PC端) 时，左右内边距加大 */
+  @media (min-width: 768px) {
+    padding: 1rem 3rem;
+  }
+
+  // 左侧 Logo 区 (BEM 命名规范：块名__元素名)
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; // Logo 图标和文字之间的间距，直接用 gap 最爽
+
+    .icon-wrapper {
+      background-color: var(--color-primary);
+      padding: 0.375rem;
+      border-radius: 0.5rem;
+      display: flex; // 让里面的 SVG 绝对居中
+    }
+
+    .title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+  }
+
+  // PC 端导航
+  &__nav-desktop {
+    display: none; // 大厂 Mobile First 原则：默认隐藏 PC 导航！
+
+    @media (min-width: 768px) {
+      display: flex; // 只有屏幕够宽，才显示出来，并横向排列
+      align-items: center;
+      gap: 2rem;     // 链接之间的间距
+    }
+
+    a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s ease; // 悬浮时的平滑过渡动画
+
+      &:hover {
+        color: var(--color-text-light);
+      }
+    }
+  }
+
+  // 移动端汉堡按钮
+  &__toggle-btn {
+    display: block; // 默认显示
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+
+    @media (min-width: 768px) {
+      display: none; // 屏幕一变宽，立刻隐藏这个按钮！
+    }
+  }
+
+  // 移动端下拉菜单 (脱离文档流，飘在空中)
+  &__nav-mobile {
+    position: absolute;   // 子绝父相：脱离常规流
+    top: 4.5rem;          // 刚好卡在 Navbar 的正下方
+    left: 0;
+    right: 0;
+    background-color: var(--color-bg-dark);
+    z-index: 30;
+    padding: 1.5rem;
+    
+    display: flex;
+    flex-direction: column; // 注意这里！手机菜单必须变成竖向排列！
+    gap: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    @media (min-width: 768px) {
+      display: none; // 防御性编程：在 PC 端绝对不能出现这个面板
+    }
+
+    a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      font-size: 1.125rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// 提取一个公用的按钮样式 (因为 Navbar 和表单里都会用到这种蓝底白字按钮)
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+  }
+}

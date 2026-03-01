@@ -1,0 +1,59 @@
+// src/pages/StudentDetail.scss
+.student-detail-container {
+  padding: 0;
+
+  .detail-header {
+    height: 80px;
+    background: #fff;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 0 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      .divider { width: 1px; height: 32px; background: #e2e8f0; }
+      .detail-avatar { width: 40px; height: 40px; background: #e0f2fe; color: #137fec; font-weight: bold; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+      .info h4 { margin: 0; line-height: 1; }
+    }
+    
+    .btn-ghost { background: rgba(19, 127, 236, 0.1); color: #137fec; border: none; font-weight: bold; }
+  }
+
+  .detail-content {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .stat-card {
+    border-radius: 16px;
+    .ant-card-body { display: flex; align-items: center; gap: 20px; }
+    .stat-icon {
+      width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px;
+      &.blue { background: #eff6ff; color: #137fec; }
+      &.orange { background: #fff7ed; color: #f97316; }
+      &.green { background: #ecfdf5; color: #10b981; }
+    }
+  }
+
+  .progress-center-card {
+    .circle-container { display: flex; justify-content: center; padding: 10px 0; }
+    .circle-label {
+      display: flex; flex-direction: column; align-items: center;
+      .percent { font-size: 32px; font-weight: bold; color: #1e293b; }
+      .text { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+    }
+    .sub-stat {
+      background: #f8fafc; border: 1px solid #f1f5f9; padding: 12px; border-radius: 12px; text-align: center;
+      span { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: bold; display: block; }
+      strong { font-size: 14px; color: #1e293b; }
+    }
+  }
+}

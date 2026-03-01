@@ -1,0 +1,73 @@
+.login-footer {
+  background-color: var(--color-bg-dark);
+  color: #94a3b8; // slate-400
+  padding: 3rem 1.5rem;
+  position: relative;
+  z-index: 20;
+
+  @media (min-width: 768px) {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+
+  // 版心容器：限制最大宽度并居中
+  &__container {
+    max-width: 80rem; // 对应 Tailwind 的 max-w-7xl
+    margin: 0 auto;
+    
+    // 🏆 核心杀招：响应式翻转
+    display: flex;
+    flex-direction: column; // 默认手机端：上下排布
+    align-items: center;
+    gap: 2rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row; // PC端：变成左右横向排布！
+      justify-content: space-between; // 并且两端顶格对齐！
+    }
+  }
+}
+
+// 版权文本区
+.copyright {
+  text-align: center; // 手机端文字居中
+  
+  @media (min-width: 768px) {
+    text-align: left; // PC端文字靠左
+  }
+
+  &__main {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    margin-bottom: 0.25rem;
+  }
+
+  &__sub {
+    font-size: 0.75rem;
+  }
+}
+
+// 底部链接导航区
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap; // 如果屏幕太窄，允许链接掉到下一行
+  justify-content: center;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    gap: 2.5rem;
+  }
+
+  a {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: white;
+    }
+  }
+}

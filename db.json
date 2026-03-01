@@ -5,7 +5,7 @@
       "en": "kit",
       "cn": "工具箱",
       "level": "高考",
-      "status": "未背",
+      "status": "已背",
       "addedDate": "2026-02-22",
       "stateus": "已背"
     },
@@ -14,7 +14,7 @@
       "en": "collision",
       "cn": "碰撞",
       "level": "高考",
-      "status": "未背",
+      "status": "已背",
       "addedDate": "2026-02-22",
       "stateus": "已背"
     },
@@ -22,7 +22,8 @@
       "en": "detectio",
       "cn": "检测",
       "level": "高考",
-      "id": "944364bb-6536-40b1-ba2f-af2992fac7de"
+      "id": "944364bb-6536-40b1-ba2f-af2992fac7de",
+      "status": "已背"
     }
   ]
 }

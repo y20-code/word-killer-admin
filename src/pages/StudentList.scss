@@ -1,0 +1,88 @@
+// src/pages/StudentList.scss
+
+.student-list-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  /* 顶部统计卡片 */
+  .stat-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(226, 232, 240, 0.5);
+
+    // 重点：强制让 Antd 的内部容器支持 Flex
+    .ant-card-body {
+      padding: 24px !important;
+    }
+
+    .stat-card-body {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    &__icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        // 只要设置了 color，Lucide 图标会自动继承这个颜色
+        &--blue { background: #eff6ff; color: #137fec; }
+        &--emerald { background: #ecfdf5; color: #10b981; }
+        &--orange { background: #fff7ed; color: #f97316; }
+        
+        // 如果图标看起来太细，可以加这一句增加一点视觉分量
+        svg { stroke-width: 2.5px; } 
+    }
+
+    .stat-card__content {
+      .label { color: #64748b; font-size: 14px; font-weight: 500; display: block; }
+      .value { 
+        margin: 4px 0 0 0 !important; 
+        color: #0f172a; 
+        font-weight: 700; 
+        line-height: 1.2;
+      }
+    }
+  }
+
+  /* 下方数据表格卡片 */
+  .data-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    
+    .ant-card-head {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 0 24px;
+      background: rgba(245, 247, 250, 0.3);
+    }
+
+    // 表格表头美化
+    .ant-table-thead > tr > th {
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    // 详情按钮
+    .detail-btn {
+      font-weight: 700;
+      font-size: 12px;
+      border-radius: 6px;
+      &:hover {
+        background-color: #f8fafc;
+        border-color: #d1d5db;
+      }
+    }
+  }
+}
