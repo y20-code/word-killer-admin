@@ -1,181 +1,174 @@
-import { useState,useEffect } from 'react';
-import { Button, Steps, Select, Input, Row, Col, DatePicker, TimePicker, Alert, Breadcrumb } from 'antd';
-import { 
-  Users, BookOpen, CalendarCheck, HelpCircle, Search, CheckCircle2, 
-  Layers, SpellCheck, ListChecks, Send 
-} from 'lucide-react';
-import './Assignment.scss';
+import { useState, useEffect } from 'react';
+import { Card, Form, Input, Select, DatePicker, Button, Transfer, message, Row, Col, Typography } from 'antd';
+import { BookOutlined, SendOutlined } from '@ant-design/icons';
+import { useUserStore } from '../store/userStore';
+import { fetchClasses, fetchWordbooks, fetchVocabularies, createAssignment } from '../api/assignment';
+// 如果没安装 dayjs，可以通过 npm install dayjs 安装，AntD v5 默认依赖
+import dayjs from 'dayjs'; 
+
+const { Title, Text } = Typography;
+
+interface TransferItem {
+  key: string;
+  title: string;
+  description: string;
+}
 
 export default function Assignment() {
-  // 🏆 状态管理：记录用户选中的内容
-  const [selectedVocab, setSelectedVocab] = useState<string | null>('core');
-  const [selectedTaskType, setSelectedTaskType] = useState<string | null>('spell');
+  const [form] = Form.useForm();
+  const currentUser = useUserStore((state) => state.currentUser);
 
-  // 词库 Mock 数据
-  const vocabList = [
-    { id: 'core', title: 'TOEFL 核心词汇', desc: '2,400 单词 · 12 单元', tag: 'Core', tagColor: 'blue' },
-    { id: 'adv', title: 'GRE 进阶词库', desc: '3,500 单词 · 18 单元', tag: 'Advanced', tagColor: 'orange' },
-    { id: 'acad', title: '学术写作高频词', desc: '800 单词 · 4 单元', tag: 'Academic', tagColor: 'purple' },
-  ];
+  // 页面需要的数据源
+  const [classes, setClasses] = useState<any[]>([]);
+  const [wordbooks, setWordbooks] = useState<any[]>([]);
+  const [vocabularies, setVocabularies] = useState<TransferItem[]>([]); // 穿梭框左侧的备选词
+  const [targetKeys, setTargetKeys] = useState<string[]>([]); // 穿梭框右侧已选的单词 ID 数组
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetchingWords, setIsFetchingWords] = useState(false);
 
-  // 任务类型 Mock 数据
-  const taskTypes = [
-    { id: 'flashcard', icon: <Layers size={32} />, title: '卡片复习', desc: '通过闪卡进行记忆强化，适合预习阶段' },
-    { id: 'spell', icon: <SpellCheck size={32} />, title: '拼写测试', desc: '强制输入拼写，确保准确掌握拼写' },
-    { id: 'choice', icon: <ListChecks size={32} />, title: '多项选择', desc: '通过释义选择单词，侧重词义辨析' },
-  ];
+  // 初始化：获取班级和词书列表
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    const initData = async () => {
+      try {
+        const [classesData, booksData] = await Promise.all([
+          fetchClasses(currentUser.id),
+          fetchWordbooks()
+        ]);
+        setClasses(classesData);
+        setWordbooks(booksData);
+      } catch (error) {
+        message.error('基础数据加载失败');
+      }
+    };
+    initData();
+  }, [currentUser]);
+
+  // 当老师选择了某本词书时，去拉取这本词书的单词
+  const handleWordbookChange = async (bookId: string) => {
+    setIsFetchingWords(true);
+    try {
+      const words = await fetchVocabularies(bookId);
+      // 🏆 核心：穿梭框要求的数据格式必须有 key
+      const transferData = words.map((v: any) => ({
+        key: v.id,
+        title: v.word,
+        description: v.translation
+      }));
+      setVocabularies(transferData);
+      // 切换词书时，清空之前选的单词
+      setTargetKeys([]); 
+    } catch (error) {
+      message.error('拉取词库失败');
+    } finally {
+      setIsFetchingWords(false);
+    }
+  };
+
+  // 穿梭框发生移动时触发
+  const handleTransferChange = (newTargetKeys: React.Key[]) => {
+    setTargetKeys(newTargetKeys as string[]);
+  };
+
+  // 提交作业表单
+  const handleFinish = async (values: any) => {
+    if (targetKeys.length === 0) {
+      return message.warning('请至少在词库中选择一个单词！');
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 🏆 拼装我们在 Markdown 里设计的完美 JSON 结构
+      const payload = {
+        classId: values.classId,
+        title: values.title,
+        wordIds: targetKeys, // ["v_001", "v_002"] 极度节省空间！
+        deadline: values.deadline.toISOString(), // 将时间转化为国际标准字符串
+        createdAt: new Date().toISOString()
+      };
+
+      await createAssignment(payload);
+      
+      message.success('🎉 作业发布成功！学生的小程序端已同步更新。');
+      // 重置表单和穿梭框
+      form.resetFields();
+      setTargetKeys([]);
+      setVocabularies([]);
+      
+    } catch (error) {
+      message.error('作业发布失败，请重试');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="assignment-container">
-      {/* 顶部面包屑与操作区 */}
-      <div className="page-header">
-        <div className="header-left">
-          <h2>布置新作业</h2>
-          <div className="divider" />
-          <Breadcrumb items={[{ title: '作业中心' }, { title: <span style={{ color: '#137fec', fontWeight: 600 }}>创建任务</span> }]} />
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button type="text">取消创建</Button>
-          <Button type="primary" style={{ fontWeight: 'bold' }}>保存草稿</Button>
-        </div>
-      </div>
+    <Card 
+      title={<><BookOutlined style={{ color: '#1677ff', marginRight: 8 }}/> 发布新词汇任务</>}
+      bordered={false} 
+      style={{ borderRadius: 12, boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}
+    >
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
+        <Row gutter={24}>
+          <Col xs={24} md={8}>
+            <Form.Item name="title" label="任务标题" rules={[{ required: true, message: '请输入任务标题' }]}>
+              <Input placeholder="例如：今日作业：四级高频词 Unit 1" size="large" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item name="classId" label="目标班级" rules={[{ required: true, message: '请选择目标班级' }]}>
+              <Select placeholder="选择要布置给哪个班级" size="large">
+                {classes.map(c => <Select.Option key={c.id} value={c.id}>{c.name}</Select.Option>)}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item name="deadline" label="截止时间" rules={[{ required: true, message: '请选择截止时间' }]}>
+              <DatePicker showTime style={{ width: '100%' }} size="large" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-      {/* 🏆 Ant Design 进度条：完美替代手写圆圈 */}
-      <div style={{ padding: '0 40px', marginBottom: 40 }}>
-        <Steps 
-          current={1} // 假设当前进行到第 2 步 (索引为 1)
-          items={[
-            { title: '选择班级' },
-            { title: '选择词库' },
-            { title: '设置截止时间' },
-            { title: '任务类型' },
-          ]}
-        />
-      </div>
-
-      {/* 第一步：选择班级 */}
-      <div className="form-card">
-        <div className="section-title">
-          <div className="icon-box blue"><Users size={20} /></div>
-          <h3>第一步：选择班级</h3>
-        </div>
-        <Row gutter={24} align="middle">
-          <Col xs={24} md={12}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 8 }}>选择授课班级</p>
+        <Card type="inner" title="智能词库挑选" style={{ marginBottom: 24, backgroundColor: '#f8fafc' }}>
+          <Form.Item label="1. 先选择词书来源">
             <Select 
-              size="large" 
-              defaultValue="classA" 
-              style={{ width: '100%' }}
-              options={[
-                { value: 'classA', label: '英语 A 班 (高级班)' },
-                { value: 'classB', label: '英语 B 班 (中级班)' },
-                { value: 'classC', label: '英语 C 班 (基础班)' },
-                { value: 'all', label: '全部班级' },
-              ]}
-            />
-          </Col>
-          <Col xs={24} md={12}>
-            <p style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic', marginTop: 24 }}>已选择班级共有 42 名学生将收到此任务</p>
-          </Col>
-        </Row>
-      </div>
+              placeholder="选择词书库（如：四级核心词汇）" 
+              style={{ width: 300 }} 
+              onChange={handleWordbookChange}
+              size="large"
+            >
+              {wordbooks.map(b => <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>)}
+            </Select>
+          </Form.Item>
 
-      {/* 第二步：选择词库 */}
-      <div className="form-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <div className="section-title" style={{ marginBottom: 0 }}>
-            <div className="icon-box emerald"><BookOpen size={20} /></div>
-            <h3>第二步：选择词库内容</h3>
+          {/* 🏆 高大上的 AntD 穿梭框！ */}
+          <div style={{ marginTop: 24 }}>
+            <Text strong style={{ display: 'block', marginBottom: 12 }}>2. 从词库挑选要下发的单词 ({targetKeys.length} 个已选)</Text>
+            <Transfer
+              dataSource={vocabularies}
+              titles={['备选词库', '本次作业包含的单词']}
+              targetKeys={targetKeys}
+              onChange={handleTransferChange}
+              render={(item) => <span style={{ fontWeight: 500 }}>{item.title} <Text type="secondary" style={{ fontSize: 12 }}>- {item.description}</Text></span>}
+              listStyle={{
+                width: '45%',
+                height: 400,
+              }}
+              showSearch // 开启搜索功能
+            />
           </div>
-          <Input 
-            placeholder="搜索词库或分类..." 
-            prefix={<Search size={16} color="#94a3b8" />} 
-            style={{ width: 250, borderRadius: 8 }} 
-            size="large"
-          />
-        </div>
-        <Row gutter={[16, 16]}>
-          {vocabList.map(item => (
-            <Col xs={24} md={8} key={item.id}>
-              {/* 🏆 状态驱动的选中效果 */}
-              <div 
-                className={`vocab-card ${selectedVocab === item.id ? 'selected' : ''}`}
-                onClick={() => setSelectedVocab(item.id)}
-              >
-                {selectedVocab === item.id && <CheckCircle2 size={20} className="check-icon" />}
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: '#f1f5f9', color: '#64748b', textTransform: 'uppercase' }}>
-                  {item.tag}
-                </span>
-                <h4>{item.title}</h4>
-                <p>{item.desc}</p>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </div>
+        </Card>
 
-      {/* 第三步：设置截止日期 */}
-      <div className="form-card">
-        <div className="section-title">
-          <div className="icon-box orange"><CalendarCheck size={20} /></div>
-          <h3>第三步：设置截止日期</h3>
-        </div>
-        <Row gutter={[32, 24]}>
-          <Col xs={24} md={12}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 8 }}>选择日期与时间</p>
-            <div style={{ display: 'flex', gap: 12 }}>
-              {/* 🏆 强大的 Antd 日期与时间选择器 */}
-              <DatePicker size="large" style={{ flex: 2 }} placeholder="选择日期" />
-              <TimePicker size="large" style={{ flex: 1 }} format="HH:mm" placeholder="时间" />
-            </div>
-          </Col>
-          <Col xs={24} md={12}>
-            <Alert 
-              message={<span style={{ fontWeight: 'bold' }}>注意：</span>}
-              description="截止日期后提交的作业将被标记为“逾期”，您可以设置是否扣除部分积分。"
-              type="warning" 
-              showIcon 
-              style={{ marginTop: 24, borderRadius: 12 }}
-            />
-          </Col>
-        </Row>
-      </div>
-
-      {/* 第四步：任务类型 */}
-      <div className="form-card">
-        <div className="section-title">
-          <div className="icon-box indigo"><HelpCircle size={20} /></div>
-          <h3>第四步：任务类型</h3>
-        </div>
-        <Row gutter={[24, 24]}>
-          {taskTypes.map(type => (
-            <Col xs={24} md={8} key={type.id}>
-              {/* 🏆 状态驱动的任务卡片 */}
-              <div 
-                className={`type-card ${selectedTaskType === type.id ? 'selected' : ''}`}
-                onClick={() => setSelectedTaskType(type.id)}
-              >
-                <div className="icon-wrapper">{type.icon}</div>
-                <h4>{type.title}</h4>
-                <p>{type.desc}</p>
-              </div>
-            </Col>
-          ))}
-        </Row>
-      </div>
-
-      {/* 底部发布按钮 */}
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0 40px' }}>
-        <Button 
-          type="primary" 
-          size="large" 
-          icon={<Send size={20} />} 
-          style={{ height: 56, padding: '0 48px', fontSize: 18, borderRadius: 12, boxShadow: '0 8px 16px rgba(19,127,236,0.2)' }}
-          onClick={() => alert(`🎉 发布成功！\n词库: ${selectedVocab}\n类型: ${selectedTaskType}`)}
-        >
-          立即发布作业
-        </Button>
-      </div>
-    </div>
+        <Form.Item style={{ textAlign: 'right', marginTop: 32 }}>
+          <Button size="large" onClick={() => form.resetFields()} style={{ marginRight: 16 }}>
+            清空重置
+          </Button>
+          <Button type="primary" size="large" htmlType="submit" icon={<SendOutlined />} loading={isSubmitting}>
+            一键派发任务
+          </Button>
+        </Form.Item>
+      </Form>
+    </Card>
   );
 }

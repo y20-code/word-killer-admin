@@ -35,7 +35,9 @@
       "password": "123",
       "role": "parent",
       "fullName": "李雷爸爸",
-      "childrenIds": ["s_101"],
+      "childrenIds": [
+        "s_101"
+      ],
       "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Parent",
       "wechatOpenId": "wx_oP123456789"
     }
@@ -89,9 +91,25 @@
       "id": "a_991",
       "classId": "c_A01",
       "title": "今日任务：四级高频词 Unit 1",
-      "wordIds": ["v_001", "v_002", "v_003"],
+      "wordIds": [
+        "v_001",
+        "v_002",
+        "v_003"
+      ],
       "deadline": "2026-03-02T22:00:00Z",
       "createdAt": "2026-03-02T08:00:00Z"
+    },
+    {
+      "id": "ace2",
+      "classId": "c_A01",
+      "title": "text1",
+      "wordIds": [
+        "v_001",
+        "v_002",
+        "v_003"
+      ],
+      "deadline": "2026-03-01T18:00:00.000Z",
+      "createdAt": "2026-03-02T12:30:53.445Z"
     }
   ],
   "student_task_records": [
