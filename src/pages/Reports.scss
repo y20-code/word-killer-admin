@@ -1,0 +1,76 @@
+.report-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  // 顶部操作区
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  // 核心统计卡片
+  .kpi-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+
+      .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.blue { background: #eff6ff; color: #137fec; }
+        &.purple { background: #faf5ff; color: #a855f7; }
+        &.orange { background: #fff7ed; color: #f97316; }
+      }
+    }
+    
+    .kpi-value {
+      margin: 4px 0 16px 0 !important;
+      font-size: 28px !important;
+    }
+  }
+
+  // 普通图表/表格卡片
+  .chart-card {
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    height: 100%;
+    
+    .ant-card-head {
+      border-bottom: 1px solid #f1f5f9;
+    }
+  }
+
+  // 排行榜序号样式 (金、银、铜)
+  .rank-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+
+    &.rank-1 { background-color: #fbbf24; } // 金牌
+    &.rank-2 { background-color: #cbd5e1; } // 银牌
+    &.rank-3 { background-color: #fca5a5; } // 铜牌
+    &.rank-other { background-color: #f1f5f9; color: #64748b; }
+  }
+}

@@ -6,6 +6,9 @@ import AuthGuard from './components/AuthGuard';
 import MainLayout from './layouts/MainLayout';
 import StudentList from './pages/StudentList';
 import StudentDetail from './pages/StudentDetail';
+import Settings from './pages/Settings';
+import Assignment from './pages/Assignment';
+import Report from './/pages/Report';
 
 export default function App() {
   return (
@@ -26,6 +29,9 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/students" element={<StudentList />} />
           <Route path="/students/:id" element={<StudentDetail />} />
+          <Route path="/assignments" element={<Assignment />} />
+          <Route path="/reports" element={<Report />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

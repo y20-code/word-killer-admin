@@ -1,0 +1,119 @@
+.assignment-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+
+  // 顶部面包屑与操作区
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      h2 { margin: 0; font-size: 20px; font-weight: 700; color: #1e293b; }
+      .divider { width: 1px; height: 16px; background: #cbd5e1; }
+    }
+  }
+
+  // 统一定义表单卡片
+  .form-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      
+      .icon-box {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &.blue { background: #eff6ff; color: #137fec; }
+        &.emerald { background: #ecfdf5; color: #10b981; }
+        &.orange { background: #fff7ed; color: #f97316; }
+        &.indigo { background: #eef2ff; color: #6366f1; }
+      }
+      
+      h3 { margin: 0; font-size: 18px; font-weight: 700; color: #1e293b; }
+    }
+  }
+
+  /* 🏆 自定义词库卡片 (可选中) */
+  .vocab-card {
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    position: relative;
+
+    &:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    &.selected {
+      border-color: #137fec;
+      background: #eff6ff;
+      box-shadow: 0 0 0 1px #137fec;
+    }
+
+    h4 { margin: 8px 0 4px; font-weight: 700; font-size: 14px; }
+    p { margin: 0; font-size: 12px; color: #64748b; }
+    
+    .check-icon {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      color: #137fec;
+    }
+  }
+
+  /* 🏆 自定义任务类型卡片 (可选中) */
+  .type-card {
+    padding: 24px;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+
+    .icon-wrapper {
+      margin-bottom: 16px;
+      color: #94a3b8;
+      transition: all 0.2s;
+    }
+
+    h4 { margin: 0 0 8px; font-weight: 700; font-size: 14px; color: #1e293b; }
+    p { margin: 0; font-size: 12px; color: #64748b; }
+
+    &:hover {
+      border-color: #e2e8f0;
+      background: #f8fafc;
+    }
+
+    &.selected {
+      border-color: #137fec;
+      background: #eff6ff;
+      .icon-wrapper { color: #137fec; transform: scale(1.1); }
+    }
+  }
+}

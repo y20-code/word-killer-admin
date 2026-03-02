@@ -1,0 +1,92 @@
+// src/pages/Settings.scss
+
+.settings-container {
+  padding: 24px;
+  max-width: 900px; // 保持大厂设置页常见的宽度限制
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .settings-card {
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    
+    // Antd Card 头部美化
+    .ant-card-head {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 0 24px;
+      min-height: 56px;
+      background: rgba(245, 247, 250, 0.3);
+      
+      .ant-card-head-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        color: #1e293b;
+        font-size: 16px;
+      }
+    }
+
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  // 列表型设置项（如安全、通知里的横向排列）
+  .setting-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    
+    &:not(:last-child) {
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .info {
+      h4 { margin: 0 0 4px 0; color: #1e293b; font-weight: 600; font-size: 14px; }
+      p { margin: 0; color: #64748b; font-size: 12px; }
+    }
+  }
+
+  // 头像上传区域美化
+  .avatar-uploader {
+    position: relative;
+    display: inline-block;
+    
+    .ant-avatar {
+      border: 4px solid #f1f5f9;
+    }
+
+    .camera-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 32px;
+      height: 32px;
+      background: #137fec;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: #0f65bd;
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  // 表单标签加粗
+  .ant-form-item-label > label {
+    font-weight: 600;
+    color: #334155;
+  }
+}
