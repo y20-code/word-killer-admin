@@ -6,9 +6,9 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ children }: AuthGuardProps) {
   // 1. 搜身：检查有没有通行证
-  const token = localStorage.getItem('word_killer_token');
+  const token = localStorage.getItem('token');
 
-  // 2. 核心拦截逻辑（你记忆中最深的那句话！）
+  // 2. 核心拦截逻辑
   if (!token) {
     return <Navigate to="/" replace />;
   }

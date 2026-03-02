@@ -1,17 +1,98 @@
-import { Card, Form, Input, Select, Switch, Button, Row, Col, Avatar, Typography } from 'antd';
+import { useEffect, useState,useRef } from 'react';
+import { Card, Form, Input, Select, Switch, Button, Row, Col, Avatar, Typography,message } from 'antd';
 import { User, Shield, BellRing, SlidersHorizontal, Globe, Camera, Save } from 'lucide-react';
 import './Settings.scss';
+import { updateUser } from '../api/auth';
+import { useUserStore } from '../store/userStore';
 
 const { TextArea } = Input;
 const { Text } = Typography;
 
 export default function Settings() {
-  const [form] = Form.useForm();
+    const [form] = Form.useForm();
+    const currentUser = useUserStore((state) => state.currentUser);
+    const setCurrentUser = useUserStore((state) => state.setCurrentUser);
+    const [currentAvatar, setCurrentAvatar] = useState<string>('');
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    // 🏆 大厂逻辑：优先信任 Zustand 内存里的 currentUser，再去查 localStorage
+    const user = currentUser || JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+    if (user && user.email) { // 确保 user 是有效数据
+      // 获取头像（优先读取数据库存的 customAvatar）
+      const defaultAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${user.email}`;
+      setCurrentAvatar(user.customAvatar || defaultAvatar);
+
+      // 把数据同步给表单
+      form.setFieldsValue({
+        fullName: user.fullName || '',
+        title: user.title || '',           
+        education: user.education || '',   
+        gradeScale: user.gradeScale || 'percent',
+        viewMode: user.viewMode || 'card',
+        language: user.language || 'zh-CN',
+        emailNotif: user.emailNotif ?? true, 
+        pushNotif: user.pushNotif ?? true,
+        twoFactor: user.twoFactor ?? false
+      });
+    }
+  }, [currentUser, form]);
+
+  const triggerUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 限制一下图片大小，超过 2MB 拒绝（大厂标配防御）
+    if (file.size > 100 * 1024) {
+      return message.error('图片大小不能超过 100k b！');1
+    }
+
+    // 使用 FileReader 将图片转为 Base64 字符串
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setCurrentAvatar(base64String); // 瞬间更新页面上的头像预览
+      message.success('本地图片已加载，请点击底部的"保存更改"应用设置！');
+    };
+    reader.readAsDataURL(file); // 触发读取
+  };
 
   // 模拟保存操作
-  const handleSave = (values: any) => {
-    console.log('保存的设置数据:', values);
-    alert('✅ 更改已保存！(请查看控制台日志)');
+  const handleSave = async (values: any) => {
+    if (!currentUser || !currentUser.id) {
+        return message.error('用户状态异常，请重新登录！');
+    }
+
+    setIsSaving(true); // 开启按钮 loading 转圈圈
+    
+    try {
+
+        const finalData = { ...values, customAvatar: currentAvatar }; 
+
+        // 2. 只发送一次网络请求给后端！
+        await updateUser(currentUser.id, finalData);
+
+        // 3. 后端保存成功后，同步更新本地内存和 LocalStorage (🏆 注意这里必须合并 finalData！)
+        const updatedUser = { ...currentUser, ...finalData };
+        setCurrentUser(updatedUser); // 更新 React 状态
+
+        // 4. 弹出成功的绿色提示框
+        message.success('✅ 个人设置已成功保存！');
+        
+    } catch (error) {
+        console.error("保存失败:", error);
+        message.error('保存失败，请检查网络！');
+    } finally {
+        setIsSaving(false); // 无论成功失败，关闭 loading
+    }
   };
 
   return (
@@ -21,17 +102,6 @@ export default function Settings() {
         form={form} 
         layout="vertical" 
         onFinish={handleSave}
-        initialValues={{
-          fullName: '汉德森教授',
-          title: '高级英语组组长',
-          education: '剑桥大学应用语言学硕士，TESOL 认证专家。',
-          gradeScale: 'percent',
-          viewMode: 'card',
-          language: 'zh-CN',
-          emailNotif: true,
-          pushNotif: true,
-          twoFactor: false
-        }}
       >
         
         {/* 1. 个人资料 */}
@@ -42,13 +112,24 @@ export default function Settings() {
         >
           <Row gutter={32}>
             <Col xs={24} md={6} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="avatar-uploader">
-                <Avatar size={96} src="https://picsum.photos/seed/henderson/100/100" />
-                <div className="camera-btn">
-                  <Camera size={16} />
+
+                <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/gif" 
+                    style={{ display: 'none' }} 
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                />
+                <div className="avatar-uploader" onClick={triggerUpload} style={{ cursor: 'pointer' }}>
+                    {/* 🏆 换成一模一样的真实头像，尺寸调大 */}
+                    <Avatar size={96} src={currentAvatar} style={{ backgroundColor: '#f1f5f9' }} />
+                    <div className="camera-btn">
+                    <Camera size={16} />
+                    </div>
                 </div>
-              </div>
-              <Text type="secondary" style={{ fontSize: 12, marginTop: 12 }}>支持 JPG, PNG, GIF</Text>
+                <Text type="secondary" style={{ fontSize: 12, marginTop: 12 }}>
+                    {currentUser?.email} {/* 显示邮箱 */}
+                </Text>
             </Col>
             
             <Col xs={24} md={18}>
@@ -170,7 +251,7 @@ export default function Settings() {
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 12, marginBottom: 40 }}>
           <Button size="large" onClick={() => form.resetFields()}>重置</Button>
           {/* htmlType="submit" 会自动触发 Form 的 onFinish */}
-          <Button type="primary" size="large" htmlType="submit" icon={<Save size={18} />}>
+          <Button type="primary" size="large" htmlType="submit" icon={<Save size={18} /> } loading={isSaving}>
             保存更改
           </Button>
         </div>

@@ -1,19 +1,27 @@
-import { useState } from 'react';
+import { useEffect,useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Typography, Badge, Avatar, Button } from 'antd';
+import { Layout, Menu, Typography, Badge, Avatar, Button,Space } from 'antd';
 import { 
   DashboardOutlined, TeamOutlined, BookOutlined, BarChartOutlined, 
   SettingOutlined, BellOutlined, PlusOutlined 
 } from '@ant-design/icons';
-import '../pages/Dashboard.scss'; // 复用之前的样式
+import '../pages/Dashboard.scss'; 
+import { useUserStore } from '../store/userStore';
 
 const { Header, Sider, Content } = Layout;
-const { Title } = Typography;
+const { Title,Text } = Typography;
 
 export default function MainLayout() {
-  const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation(); // 获取当前路由路径
+
+    const currentUser = useUserStore((state) => state.currentUser);
+
+    const [collapsed, setCollapsed] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation(); // 获取当前路由路径
+
+    useEffect(() => {
+        const userInfoStr = localStorage.getItem('userInfo');
+    }, []);
 
   // 🏆 核心：将 menu 的 key 直接设置为路由路径！
   const menuItems = [
@@ -23,6 +31,9 @@ export default function MainLayout() {
     { key: '/reports', icon: <BarChartOutlined />, label: '数据报告' },
     { key: '/settings', icon: <SettingOutlined />, label: '设置' },
   ];
+
+  const displayName = currentUser?.fullName || currentUser?.email?.split('@')[0] || '加载中...';
+  const avatarUrl = currentUser?.customAvatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser?.email || 'default'}`;
 
   // 根据当前路由，动态决定 Header 的标题
   const getPageTitle = () => {
@@ -59,10 +70,13 @@ export default function MainLayout() {
             <Badge dot>
               <BellOutlined className="bell-icon" />
             </Badge>
-            <Button type="primary" icon={<PlusOutlined />} className="btn-new-task">
+            <Button type="primary" icon={<PlusOutlined />} className="btn-new-task" onClick={() => navigate('/assignments')}>
               新建任务
             </Button>
-            <Avatar src="https://picsum.photos/seed/prof/100/100" />
+            <Space style={{ cursor: 'pointer', marginLeft: 16 }}>
+              <Avatar src={avatarUrl} style={{ backgroundColor: '#f1f5f9' }} />
+              <Text strong>{displayName}</Text>
+            </Space>
           </div>
         </Header>
 

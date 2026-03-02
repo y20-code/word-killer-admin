@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { UserPlus, Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle } from 'lucide-react';
+import { message } from 'antd';
+import { registerUser, checkEmailExists } from '../api/auth';
 
 interface RegisterFormProps {
     onSwitchToLogin: () => void;
@@ -10,15 +12,52 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleRegister = (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (password !== confirmPassword) return alert("两次输入的密码不一致！");
-        if (!email) return alert("请填写邮箱！");
 
-        alert("🎉 注册成功！请使用新账号登录。");
-        // 注册成功后，直接切回登录页
-        onSwitchToLogin();
+        if (password !== confirmPassword) return message.error("两次输入的密码不一致！");
+
+        if (!email) return message.error("请填写邮箱！");
+
+        setIsLoading(true);
+
+        try {
+            // 1. 先查询邮箱是否已经被注册
+            const existingUsers: any = await checkEmailExists(email);
+            if (existingUsers.length > 0) {
+                message.warning("该邮箱已被注册，请直接登录！");
+                setIsLoading(false);
+                return;
+            }
+
+            // 2. 组装要发送给后端的数据 (json-server 会自动生成 id)
+            const newUser = {
+                email,
+                password, // 注意：实际开发中密码必须加密(MD5/SHA)，但在 json-server 模拟阶段存明文即可
+                role: 'teacher', 
+                createdAt: new Date().toISOString()
+            };
+
+            // 3. 发送 POST 请求写入 db.json
+            await registerUser(newUser);
+
+            message.success("🎉 注册成功！请使用新账号登录。");
+            
+            // 4. 清空表单并切换回登录页
+            setEmail('');
+            setPassword('');
+            setConfirmPassword('');
+            onSwitchToLogin();
+
+        } catch (error) {
+            console.error(error);
+            message.error("注册失败，请检查网络设置。");
+        } finally {
+            setIsLoading(false); // 关闭加载状态
+        }
+
     };
 
     return (
@@ -79,8 +118,8 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                     </label>
                 </div>
 
-                <button className="btn-submit group" type="submit" style={{ marginTop: '0.5rem' }}>
-                    Sign Up Now
+                <button className="btn-submit group" type="submit" disabled={isLoading} style={{ marginTop: '0.5rem' }}>
+                    {isLoading ? '注册中...' : '注册'}
                     <CheckCircle className="arrow-icon" size={20} />
                 </button>
             </form>

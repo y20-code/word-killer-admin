@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, BookOpen } from 'lucide-react';
-const MOCK_DB = {
-  validEmail: 'admin@test.com',
-  validPassword: '123'
-};
+import { message } from 'antd';
+import { loginUser } from '../api/auth';
+import { useUserStore } from '../store/userStore';
 
 interface LoginFormProps {
     onSwitchToRegister: () => void;
@@ -12,21 +11,47 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+
+    const setCurrentUser = useUserStore(state => state.setCurrentUser);
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading,setIsLoading] = useState(false)
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email || !password) return alert("邮箱和密码不能为空哦！");
+        setIsLoading(true);
 
-        if (email === MOCK_DB.validEmail && password === MOCK_DB.validPassword) {
-            alert("登录成功！即将进入系统...");
-            localStorage.setItem('word_killer_token', 'mock_token_12345');
-            navigate('/dashboard');
-        } else {
-            alert("账号或密码错误，请重试！\n(提示：admin@test.com / 123)");
+        const cleanEmail = email.trim();
+        const cleanPassword = password.trim();
+
+        try {
+            const allUsers: any = await loginUser(email, password);
+
+            const user = allUsers.find(
+                (u: any) => u.email === cleanEmail && u.password === cleanPassword
+            );
+
+            if (user) {
+                message.success(`欢迎回来，${user.email}！`);
+                
+                localStorage.setItem('token', `mock_token_${user.id}`);
+                localStorage.setItem('userInfo', JSON.stringify(user));
+
+                if (setCurrentUser) {
+                     setCurrentUser(user);
+                }
+                
+                // 跳转到主页面 (班级概览)
+                navigate('/dashboard');
+            } else {
+                message.error("邮箱或密码错误，请重试！"); 
+            }
+        } catch (error) {
+            message.error("登录服务异常");
+        } finally{
+            setIsLoading(false);
         }
     };
 

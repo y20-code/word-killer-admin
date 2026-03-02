@@ -1,29 +1,134 @@
 {
-  "words": [
+  "institutions": [
     {
-      "id": "6a670984-316d-42c8-8ff3-f83b81703578",
-      "en": "kit",
-      "cn": "工具箱",
-      "level": "高考",
-      "status": "已背",
-      "addedDate": "2026-02-22",
-      "stateus": "已背"
+      "id": "org_001",
+      "name": "未来教育科技实验学校",
+      "licenseType": "pro",
+      "expireDate": "2027-03-02T00:00:00Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "99ea",
+      "email": "323@qq.com",
+      "password": "123",
+      "role": "teacher",
+      "fullName": "杨老师",
+      "title": "高级讲师",
+      "institutionId": "org_001",
+      "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Yang",
+      "createdAt": "2026-03-02T03:18:33Z"
     },
     {
-      "id": "1394e568-75a1-4a6e-9f8c-65657bfbe21d",
-      "en": "collision",
-      "cn": "碰撞",
-      "level": "高考",
-      "status": "已背",
-      "addedDate": "2026-02-22",
-      "stateus": "已背"
+      "id": "s_101",
+      "email": "student01@qq.com",
+      "password": "123",
+      "role": "student",
+      "fullName": "李雷",
+      "classId": "c_A01",
+      "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Lilei",
+      "createdAt": "2026-03-02T08:00:00Z"
     },
     {
-      "en": "detectio",
-      "cn": "检测",
-      "level": "高考",
-      "id": "944364bb-6536-40b1-ba2f-af2992fac7de",
-      "status": "已背"
+      "id": "p_999",
+      "email": "parent@qq.com",
+      "password": "123",
+      "role": "parent",
+      "fullName": "李雷爸爸",
+      "childrenIds": ["s_101"],
+      "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Parent",
+      "wechatOpenId": "wx_oP123456789"
+    }
+  ],
+  "classes": [
+    {
+      "id": "c_A01",
+      "name": "2026届 四级冲刺A班",
+      "teacherId": "99ea",
+      "inviteCode": "A8X9P2",
+      "createdAt": "2026-03-01T12:00:00Z"
+    }
+  ],
+  "wordbooks": [
+    {
+      "id": "book_CET4",
+      "name": "大学英语四级核心词汇",
+      "coverImage": "https://api.dicebear.com/7.x/shapes/svg?seed=CET4",
+      "unitCount": 30,
+      "description": "包含历年真题出现频率最高的核心单词"
+    }
+  ],
+  "vocabularies": [
+    {
+      "id": "v_001",
+      "bookId": "book_CET4",
+      "word": "abandon",
+      "phonetic": "/əˈbændən/",
+      "translation": "v. 放弃，抛弃",
+      "category": "高频动词"
+    },
+    {
+      "id": "v_002",
+      "bookId": "book_CET4",
+      "word": "absolute",
+      "phonetic": "/ˈæbsəluːt/",
+      "translation": "adj. 绝对的，完全的",
+      "category": "高频形容词"
+    },
+    {
+      "id": "v_003",
+      "bookId": "book_CET4",
+      "word": "absorb",
+      "phonetic": "/əbˈzɔːrb/",
+      "translation": "v. 吸收，吸引",
+      "category": "高频动词"
+    }
+  ],
+  "assignments": [
+    {
+      "id": "a_991",
+      "classId": "c_A01",
+      "title": "今日任务：四级高频词 Unit 1",
+      "wordIds": ["v_001", "v_002", "v_003"],
+      "deadline": "2026-03-02T22:00:00Z",
+      "createdAt": "2026-03-02T08:00:00Z"
+    }
+  ],
+  "student_task_records": [
+    {
+      "id": "tr_001",
+      "assignmentId": "a_991",
+      "studentId": "s_101",
+      "status": "doing",
+      "progress": 66,
+      "score": 100,
+      "completedAt": null
+    }
+  ],
+  "learning_logs": [
+    {
+      "id": "log_001",
+      "studentId": "s_101",
+      "wordId": "v_001",
+      "isCorrect": true,
+      "responseTime": 1200,
+      "createdAt": "2026-03-02T19:05:12Z"
+    },
+    {
+      "id": "log_002",
+      "studentId": "s_101",
+      "wordId": "v_002",
+      "isCorrect": false,
+      "responseTime": 4500,
+      "createdAt": "2026-03-02T19:06:30Z"
+    },
+    {
+      "id": "log_003",
+      "studentId": "s_101",
+      "wordId": "v_002",
+      "isCorrect": true,
+      "responseTime": 800,
+      "createdAt": "2026-03-02T19:08:15Z"
     }
   ]
 }
