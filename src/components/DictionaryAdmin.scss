@@ -1,0 +1,119 @@
+.dict-admin-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+
+  .header {
+    margin-bottom: 24px;
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 24px;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+
+  .add-word-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 32px;
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      
+      input {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+        &:focus {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      .btn-submit {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        &:hover { background: #2563eb; }
+        &:disabled { opacity: 0.7; cursor: not-allowed; }
+      }
+    }
+  }
+
+  .table-container {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+
+    .word-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+
+      th {
+        background: #f8fafc;
+        padding: 16px;
+        font-size: 14px;
+        color: #475569;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      td {
+        padding: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #1f2937;
+        font-size: 15px;
+      }
+
+      .fw-bold { font-weight: 600; }
+      
+      .badge {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .btn-delete {
+        background: transparent;
+        color: #ef4444;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 6px;
+        &:hover { background: #fee2e2; }
+      }
+    }
+    
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: #94a3b8;
+    }
+  }
+}

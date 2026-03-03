@@ -4,7 +4,7 @@ import { message } from 'antd';
 
 // 1. 创建 Axios 实例
 const request = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: 'http://localhost:3002',
   timeout: 10000, // 请求超时时间 (10秒)
 });
 

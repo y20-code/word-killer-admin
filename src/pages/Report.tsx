@@ -1,35 +1,43 @@
-import React, { useEffect, useRef } from 'react';
-import { Card, Row, Col, Typography, Select, Button, Space, Progress, Table, Avatar, Tag } from 'antd';
+import React, { useEffect, useRef,useState } from 'react';
+import { Card, Row, Col, Typography, Select, Button, Space, Progress, Table, Avatar, Tag,Spin } from 'antd';
 import { 
   TrendingUp, CheckCircle, Clock, Download, Calendar, Users, 
   Award, Flame 
 } from 'lucide-react';
 import * as echarts from 'echarts';
 import type { ColumnsType } from 'antd/es/table';
+import { useUserStore } from '../store/userStore';
+import { fetchReportData } from '../api/report';
 import './Reports.scss'
 
 const { Title, Text } = Typography;
 
-// --- Mock 数据区 ---
-const errorWordsData = [
-  { key: '1', word: 'Ambiguous', meaning: 'adj. 模棱两可的', count: 124, mastery: 32 },
-  { key: '2', word: 'Conspicuous', meaning: 'adj. 显眼的', count: 98, mastery: 45 },
-  { key: '3', word: 'Hypothesis', meaning: 'n. 假设', count: 82, mastery: 58 },
-];
-
-const leaderboardData = [
-  { key: '1', rank: 1, name: 'Sarah Williams', class: '英语 A 班', vocab: 3420, accuracy: 98.5, badges: ['award', 'flame'], avatar: 'https://picsum.photos/seed/sarah/100/100' },
-  { key: '2', rank: 2, name: 'James Chen', class: '英语 A 班', vocab: 3215, accuracy: 96.2, badges: ['award'], avatar: 'https://picsum.photos/seed/james/100/100' },
-  { key: '3', rank: 3, name: 'Emily Lee', class: '英语 C 班', vocab: 3050, accuracy: 94.8, badges: ['flame'], initials: 'EL' },
-];
 
 export default function Report() {
   // 🏆 ECharts 挂载点
   const chartRef = useRef<HTMLDivElement>(null);
+  const currentUser = useUserStore((state) => state.currentUser);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [reportData, setReportData] = useState<any>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!currentUser?.id) return;
+      setIsLoading(true);
+      try {
+        const data = await fetchReportData(currentUser.id);
+        setReportData(data);
+      } catch (e) { console.error(e); }
+      finally { setIsLoading(false); }
+    };
+    loadData();
+  }, [currentUser]);
 
   useEffect(() => {
     let myChart: echarts.ECharts | null = null;
-    if (chartRef.current) {
+
+    if (chartRef.current && reportData) {
       myChart = echarts.init(chartRef.current);
       myChart.setOption({
         tooltip: { trigger: 'axis' },
@@ -37,7 +45,7 @@ export default function Report() {
         xAxis: { 
           type: 'category', 
           boundaryGap: false,
-          data: ['10月01', '10月07', '10月14', '10月21', '10月28', '今天'],
+          data: ['10月01', '10月07', '10月14', '10月21', '10月28', '今天'], 
           axisLine: { lineStyle: { color: '#e2e8f0' } },
           axisLabel: { color: '#64748b' }
         },
@@ -47,12 +55,11 @@ export default function Report() {
           axisLabel: { color: '#64748b' }
         },
         series: [{
-          data: [40, 60, 45, 80, 70, 95],
+          data: [40, 60, 45, 80, 70, 95], 
           type: 'line',
           smooth: true,
           symbolSize: 0,
           lineStyle: { color: '#137fec', width: 3 },
-          // 🏆 ECharts 渐变色填充魔法
           areaStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(19, 127, 236, 0.4)' },
@@ -69,7 +76,7 @@ export default function Report() {
         myChart?.dispose();
       };
     }
-  }, []);
+  }, [reportData]);
 
   // --- 表格列定义 ---
   const errorColumns: ColumnsType<any> = [
@@ -98,6 +105,8 @@ export default function Report() {
       )}
   ];
 
+  if (isLoading) return <div style={{textAlign:'center', padding:'50px'}}><Spin size="large"/></div>;
+
   return (
     <div className="report-container">
       {/* 1. 顶部操作区 */}
@@ -125,8 +134,8 @@ export default function Report() {
               <Tag color="success" bordered={false}>+4.2% ↑</Tag>
             </div>
             <Text type="secondary" strong>平均正确率趋势</Text>
-            <Title level={2} className="kpi-value">86.4%</Title>
-            <Progress percent={86.4} showInfo={false} strokeColor="#137fec" size="small" />
+            <Title level={2} className="kpi-value">{reportData.kpi.avgAccuracy}%</Title>
+            <Progress percent={Number(reportData.kpi.avgAccuracy)} showInfo={false} strokeColor="#137fec" size="small" />
           </Card>
         </Col>
         <Col xs={24} md={8}>
@@ -135,9 +144,9 @@ export default function Report() {
               <div className="icon-box purple"><CheckCircle size={24} /></div>
               <Tag color="success" bordered={false}>+12% ↑</Tag>
             </div>
-            <Text type="secondary" strong>单词完成率</Text>
-            <Title level={2} className="kpi-value">92.8%</Title>
-            <Progress percent={92.8} showInfo={false} strokeColor="#a855f7" size="small" />
+            <Text type="secondary" strong>总掌握词汇数</Text>
+            <Title level={2} className="kpi-value">{reportData.kpi.totalWords}</Title>
+            <Progress percent={80} showInfo={false} strokeColor="#a855f7"/>
           </Card>
         </Col>
         <Col xs={24} md={8}>
@@ -161,7 +170,7 @@ export default function Report() {
       {/* 4. 中间两列分析 */}
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12}>
-          <Card title="词汇类别掌握情况" extra={<Select defaultValue="type" variant="borderless" options={[{value:'type',label:'按词性'},{value:'diff',label:'按难度'}]} />} bordered={false} className="chart-card">
+          <Card title="词汇类别掌握情况" bordered={false} className="chart-card">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div><div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}><Text strong>名词 (Nouns)</Text><Text strong style={{color:'#137fec'}}>92%</Text></div><Progress percent={92} showInfo={false} strokeColor="#137fec" /></div>
               <div><div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}><Text strong>动词 (Verbs)</Text><Text strong style={{color:'#137fec'}}>78%</Text></div><Progress percent={78} showInfo={false} strokeColor="#137fec" /></div>
@@ -171,15 +180,16 @@ export default function Report() {
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="高频错误词汇" extra={<Text type="secondary" style={{fontSize: 12}}>按错误次数排序</Text>} bordered={false} className="chart-card" bodyStyle={{ padding: 0 }}>
-            <Table columns={errorColumns} dataSource={errorWordsData} pagination={false} size="middle" />
+          {/* 🏆 高频错误词汇：注入真实数据 */}
+          <Card title="高频错误词汇" bordered={false} className="chart-card" bodyStyle={{ padding: 0 }}>
+            <Table columns={errorColumns} dataSource={reportData.topErrors} pagination={false} size="middle" />
           </Card>
         </Col>
       </Row>
 
       {/* 5. 底部学生排行榜 */}
-      <Card title="学生表现排位榜 (前5名)" extra={<Button type="link">查看完整排行</Button>} bordered={false} className="chart-card" bodyStyle={{ padding: 0 }}>
-        <Table columns={rankColumns} dataSource={leaderboardData} pagination={false} />
+      <Card title="学生表现排位榜 (前5名)" extra={<Button type="link">查看完整排行</Button>} bordered={false} className="chart-card" bodyStyle={{ padding: 0 }} style={{marginTop:24}}>
+        <Table columns={rankColumns} dataSource={reportData.leaderBoard} pagination={false} />
       </Card>
 
     </div>

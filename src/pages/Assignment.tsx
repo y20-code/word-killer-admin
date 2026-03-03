@@ -54,7 +54,7 @@ export default function Assignment() {
       const transferData = words.map((v: any) => ({
         key: v.id,
         title: v.word,
-        description: v.translation
+        description: `${v.partOfSpeech || ''} ${v.translation} ${v.example ? `(例: ${v.example})` : ''}`
       }));
       setVocabularies(transferData);
       // 切换词书时，清空之前选的单词
@@ -131,9 +131,9 @@ export default function Assignment() {
         </Row>
 
         <Card type="inner" title="智能词库挑选" style={{ marginBottom: 24, backgroundColor: '#f8fafc' }}>
-          <Form.Item label="1. 先选择词书来源">
+          <Form.Item label="1. 选择任教年级 / 目标词库">
             <Select 
-              placeholder="选择词书库（如：四级核心词汇）" 
+              placeholder="请选择您要派发任务的年级 (如：高一)" 
               style={{ width: 300 }} 
               onChange={handleWordbookChange}
               size="large"

@@ -28,18 +28,6 @@
       "classId": "c_A01",
       "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Lilei",
       "createdAt": "2026-03-02T08:00:00Z"
-    },
-    {
-      "id": "p_999",
-      "email": "parent@qq.com",
-      "password": "123",
-      "role": "parent",
-      "fullName": "李雷爸爸",
-      "childrenIds": [
-        "s_101"
-      ],
-      "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Parent",
-      "wechatOpenId": "wx_oP123456789"
     }
   ],
   "classes": [
@@ -53,100 +41,76 @@
   ],
   "wordbooks": [
     {
-      "id": "book_CET4",
-      "name": "大学英语四级核心词汇",
-      "coverImage": "https://api.dicebear.com/7.x/shapes/svg?seed=CET4",
-      "unitCount": 30,
-      "description": "包含历年真题出现频率最高的核心单词"
+      "name": "初一",
+      "coverImage": "https://api.dicebear.com/7.x/shapes/svg?seed=初一",
+      "unitCount": 1,
+      "description": "系统自动聚合的 初一 专属词库",
+      "id": 1
+    },
+    {
+      "name": "初二",
+      "coverImage": "https://api.dicebear.com/7.x/shapes/svg?seed=初二",
+      "unitCount": 1,
+      "description": "系统自动聚合的 初二 专属词库",
+      "id": 2
+    },
+    {
+      "name": "五年级",
+      "coverImage": "https://api.dicebear.com/7.x/shapes/svg?seed=五年级",
+      "unitCount": 1,
+      "description": "系统自动聚合的 五年级 专属词库",
+      "id": 3
     }
   ],
   "vocabularies": [
     {
-      "id": "v_001",
-      "bookId": "book_CET4",
-      "word": "abandon",
-      "phonetic": "/əˈbændən/",
-      "translation": "v. 放弃，抛弃",
-      "category": "高频动词"
+      "bookId": 1,
+      "word": "catch",
+      "partOfSpeech": "n.",
+      "translation": "陷阱，诡计",
+      "category": "初一",
+      "example": "test1",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 1
     },
     {
-      "id": "v_002",
-      "bookId": "book_CET4",
-      "word": "absolute",
-      "phonetic": "/ˈæbsəluːt/",
-      "translation": "adj. 绝对的，完全的",
-      "category": "高频形容词"
+      "bookId": 2,
+      "word": "catch",
+      "partOfSpeech": "v.",
+      "translation": "抓住",
+      "category": "初二",
+      "example": "text2",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 2
     },
     {
-      "id": "v_003",
-      "bookId": "book_CET4",
-      "word": "absorb",
-      "phonetic": "/əbˈzɔːrb/",
-      "translation": "v. 吸收，吸引",
-      "category": "高频动词"
+      "bookId": 3,
+      "word": "curly",
+      "partOfSpeech": "adj.",
+      "translation": "卷曲的",
+      "category": "五年级",
+      "example": "text5",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 3
+    },
+    {
+      "bookId": 3,
+      "word": "slim",
+      "partOfSpeech": "adj.",
+      "translation": "苗条的",
+      "category": "五年级",
+      "example": "text5",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 4
     }
   ],
-  "assignments": [
-    {
-      "id": "a_991",
-      "classId": "c_A01",
-      "title": "今日任务：四级高频词 Unit 1",
-      "wordIds": [
-        "v_001",
-        "v_002",
-        "v_003"
-      ],
-      "deadline": "2026-03-02T22:00:00Z",
-      "createdAt": "2026-03-02T08:00:00Z"
-    },
-    {
-      "id": "ace2",
-      "classId": "c_A01",
-      "title": "text1",
-      "wordIds": [
-        "v_001",
-        "v_002",
-        "v_003"
-      ],
-      "deadline": "2026-03-01T18:00:00.000Z",
-      "createdAt": "2026-03-02T12:30:53.445Z"
-    }
-  ],
-  "student_task_records": [
-    {
-      "id": "tr_001",
-      "assignmentId": "a_991",
-      "studentId": "s_101",
-      "status": "doing",
-      "progress": 66,
-      "score": 100,
-      "completedAt": null
-    }
-  ],
-  "learning_logs": [
-    {
-      "id": "log_001",
-      "studentId": "s_101",
-      "wordId": "v_001",
-      "isCorrect": true,
-      "responseTime": 1200,
-      "createdAt": "2026-03-02T19:05:12Z"
-    },
-    {
-      "id": "log_002",
-      "studentId": "s_101",
-      "wordId": "v_002",
-      "isCorrect": false,
-      "responseTime": 4500,
-      "createdAt": "2026-03-02T19:06:30Z"
-    },
-    {
-      "id": "log_003",
-      "studentId": "s_101",
-      "wordId": "v_002",
-      "isCorrect": true,
-      "responseTime": 800,
-      "createdAt": "2026-03-02T19:08:15Z"
-    }
-  ]
+  "word_examples": [],
+  "assignments": [],
+  "assignment_words": [],
+  "student_task_records": [],
+  "learning_logs": []
 }

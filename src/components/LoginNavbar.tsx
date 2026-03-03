@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from 'react-router-dom';
 import './LoginNavbar.scss';
 
 export default function LoginNavbar() {
@@ -21,7 +22,7 @@ export default function LoginNavbar() {
       
         {/* 中右侧：PC 端导航链接 */}
         <nav className="navbar__nav-desktop">
-          <a href="#">字典</a>
+          <Link to="/dictionary">字典</Link>
           <a href="#">关于</a>
           <button className="btn-primary">体验</button>
         </nav>

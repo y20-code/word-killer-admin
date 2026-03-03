@@ -9,6 +9,7 @@ import StudentDetail from './pages/StudentDetail';
 import Settings from './pages/Settings';
 import Assignment from './pages/Assignment';
 import Report from './/pages/Report';
+import DictionaryAdmin from "./components/DictionaryAdmin";
 
 export default function App() {
   return (
@@ -32,6 +33,9 @@ export default function App() {
           <Route path="/assignments" element={<Assignment />} />
           <Route path="/reports" element={<Report />} />
           <Route path="/settings" element={<Settings />} />
+
+          <Route path="/dictionary" element={<DictionaryAdmin />} />
+          
         </Route>
       </Routes>
     </BrowserRouter>
