@@ -23,6 +23,7 @@ export default function Assignment() {
   const [wordbooks, setWordbooks] = useState<any[]>([]);
   const [vocabularies, setVocabularies] = useState<TransferItem[]>([]); // 穿梭框左侧的备选词
   const [targetKeys, setTargetKeys] = useState<string[]>([]); // 穿梭框右侧已选的单词 ID 数组
+  const [selectedGrade, setSelectedGrade] = useState<string>('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetchingWords, setIsFetchingWords] = useState(false);
@@ -49,15 +50,31 @@ export default function Assignment() {
   const handleWordbookChange = async (bookId: string) => {
     setIsFetchingWords(true);
     try {
+      // 🌟 1. 记录选中的年级名称 (如："初一")
+      const currentBook = wordbooks.find(b => b.id === bookId);
+      if (currentBook) {
+        setSelectedGrade(currentBook.name);
+      }
+
+      // 🌟 2. 拉取单词本体
       const words = await fetchVocabularies(bookId);
-      // 🏆 核心：穿梭框要求的数据格式必须有 key
-      const transferData = words.map((v: any) => ({
-        key: v.id,
-        title: v.word,
-        description: `${v.partOfSpeech || ''} ${v.translation} ${v.example ? `(例: ${v.example})` : ''}`
+      
+      // 🌟 3. (高级操作) 并发拉取每个单词对应的“例句库”，用于在穿梭框展示
+      const transferData = await Promise.all(words.map(async (v: any) => {
+        // 请求例句表，找属于这个单词的例句
+        const exRes = await fetch(`http://localhost:3002/word_examples?wordId=${v.id}`);
+        const examples = await exRes.json();
+        // 取第一条例句展示
+        const firstExample = examples.length > 0 ? examples[0].enSentence : '';
+
+        return {
+          key: v.id,
+          title: v.word,
+          description: `${v.partOfSpeech || ''} ${v.translation} ${firstExample ? `(例: ${firstExample})` : ''}`
+        };
       }));
+
       setVocabularies(transferData);
-      // 切换词书时，清空之前选的单词
       setTargetKeys([]); 
     } catch (error) {
       message.error('拉取词库失败');
@@ -79,22 +96,23 @@ export default function Assignment() {
 
     setIsSubmitting(true);
     try {
-      // 🏆 拼装我们在 Markdown 里设计的完美 JSON 结构
+      // 🏆 终极版 Payload：加入 targetGrade，实现精准分发！
       const payload = {
         classId: values.classId,
+        targetGrade: selectedGrade, // 🌟 从刚才存的 state 里读取，比如："初一"
         title: values.title,
-        wordIds: targetKeys, // ["v_001", "v_002"] 极度节省空间！
-        deadline: values.deadline.toISOString(), // 将时间转化为国际标准字符串
+        wordIds: targetKeys, 
+        deadline: values.deadline.toISOString(),
         createdAt: new Date().toISOString()
       };
 
       await createAssignment(payload);
       
-      message.success('🎉 作业发布成功！学生的小程序端已同步更新。');
-      // 重置表单和穿梭框
+      message.success('🎉 作业发布成功！对应年级的学生小程序端已同步更新。');
       form.resetFields();
       setTargetKeys([]);
       setVocabularies([]);
+      setSelectedGrade(''); // 重置
       
     } catch (error) {
       message.error('作业发布失败，请重试');

@@ -1,12 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as echarts from 'echarts'; 
-import { Card, Row, Col, Typography, Avatar, Button, Space, Table, Tag, Progress, Spin, message } from 'antd';
+import { Card, Row, Col, Typography, Avatar, Button, Space, Table, Tag, Progress, Spin, message, Modal, Tabs } from 'antd';
 import { ArrowLeftOutlined, MailOutlined, DownloadOutlined, BookOutlined, ThunderboltOutlined, CheckCircleOutlined, HistoryOutlined } from '@ant-design/icons';
 import { fetchStudentDetail } from '../api/student';
 import './StudentDetail.scss';
 
-const { Title, Text } = Typography;
+const { Title, Text,Link } = Typography;
+
+const LEVEL_CONFIG = {
+  0: { text: '未学', color: 'default', percent: 0 },
+  1: { text: '初识', color: 'red', percent: 20 },
+  2: { text: '熟悉', color: 'orange', percent: 40 },
+  3: { text: '巩固', color: 'blue', percent: 60 },
+  4: { text: '牢固', color: 'cyan', percent: 80 },
+  5: { text: '永久掌握', color: 'green', percent: 100 },
+};
 
 export default function StudentDetail() {
   const navigate = useNavigate();
@@ -16,6 +25,8 @@ export default function StudentDetail() {
   // 🏆 1. 定义页面的动态数据状态
   const [isLoading, setIsLoading] = useState(true);
   const [studentData, setStudentData] = useState<any>(null);
+
+  const [isWordModalVisible, setIsWordModalVisible] = useState(false);
 
   // 🏆 2. 页面加载时拉取数据
   useEffect(() => {
@@ -80,6 +91,13 @@ export default function StudentDetail() {
 
   if (!studentData) return null; // 防御性编程
 
+  const wordColumns = [
+    { title: '单词', key: 'word', render: (_:any, r:any) => <div><Text strong>{r.word}</Text><br/><Text type="secondary" italic style={{ fontSize: 12 }}>{r.meaning}</Text></div> },
+    { title: '学习状态', key: 'level', render: (_:any, r:any) => <Tag color={LEVEL_CONFIG[r.level as keyof typeof LEVEL_CONFIG].color}>{LEVEL_CONFIG[r.level as keyof typeof LEVEL_CONFIG].text}</Tag> },
+    { title: '答题数据', key: 'stats', render: (_:any, r:any) => <Text type="secondary">对:{r.correctCount} / 错:{r.wrongCount}</Text> },
+    { title: '最后学习', dataIndex: 'date' }
+  ];
+
   return (
     <div className="student-detail-container">
       {/* 顶部个人信息悬浮栏 */}
@@ -105,10 +123,15 @@ export default function StudentDetail() {
         {/* 第一行：统计卡片 */}
         <Row gutter={[24, 24]}>
           <Col span={8}>
-            <Card className="stat-card">
+            <Card 
+              className="stat-card" 
+              style={{ cursor: 'pointer', transition: 'all 0.3s' }}
+              hoverable
+              onClick={() => setIsWordModalVisible(true)}
+            >
               <div className="stat-icon blue"><BookOutlined /></div>
               <div>
-                <Text type="secondary">掌握词汇量</Text>
+                <Text type="secondary">已学总词汇量 <Link>(点击查看明细)</Link></Text>
                 <Title level={3}>{studentData.stats.words}</Title>
               </div>
             </Card>
@@ -138,14 +161,15 @@ export default function StudentDetail() {
         {/* 第二行：原生 ECharts 图表 + Antd 圆环进度条 */}
         <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
           <Col span={16}>
-            <Card title="词汇增长趋势">
+            {/* 🌟 1. 加上高度 100%，让它跟着 Col 走 */}
+            <Card title="词汇增长趋势" style={{ height: '100%' }}>
               <div ref={chartRef} style={{ height: 260, width: '100%' }} />
             </Card>
           </Col>
           <Col span={8}>
-            <Card title="课程进度" className="progress-center-card">
+            {/* 🌟 2. 同样加上高度 100% */}
+            <Card title="课程进度" className="progress-center-card" style={{ height: '100%' }}>
               <div className="circle-container">
-                {/* 动态计算圆环进度 */}
                 <Progress 
                    type="circle" 
                    percent={studentData.stats.correctRate > 0 ? 65 : 0} 
@@ -165,7 +189,7 @@ export default function StudentDetail() {
         </Row>
 
         {/* 第三行：Antd 数据表格 */}
-        <Card style={{ marginTop: 24 }} title={<><HistoryOutlined /> 最近活动</>} extra={<Button type="link">查看全部</Button>}>
+        <Card style={{ marginTop: 24 }} title={<><HistoryOutlined /> 最近活动</>} extra={<Button type="link" onClick={() => setIsWordModalVisible(true)}>查看全部</Button>}>
           <Table 
             dataSource={studentData.recentActivity} 
             pagination={false}
@@ -173,14 +197,35 @@ export default function StudentDetail() {
               { title: '学习单词', key: 'word', render: (_, r:any) => (
                 <div><Text strong>{r.word}</Text><br/><Text type="secondary" italic style={{ fontSize: 12 }}>{r.meaning}</Text></div>
               )},
-              { title: '难度', dataIndex: 'difficulty', key: 'diff', render: (d) => <Tag color={d==='HARD'?'orange':'green'}>{d}</Tag> },
-              { title: '词汇类别', dataIndex: 'type' },
-              { title: '掌握度', dataIndex: 'mastery', render: (m) => <Progress percent={m} size="small" strokeColor={m === 100 ? '#10b981' : '#f59e0b'} /> },
-              { title: '学习时间', dataIndex: 'date' }
+              { title: '掌握等级', key: 'levelTag', render: (_, r:any) => {
+                  const cfg = LEVEL_CONFIG[r.level as keyof typeof LEVEL_CONFIG];
+                  return <Tag color={cfg.color}>{cfg.text} (LV.{r.level})</Tag>;
+              }},
+              { title: '进度条', key: 'progress', render: (_, r:any) => {
+                  const cfg = LEVEL_CONFIG[r.level as keyof typeof LEVEL_CONFIG];
+                  return <Progress percent={cfg.percent} size="small" strokeColor={cfg.color} />;
+              }},
+              { title: '最后学习时间', dataIndex: 'date' }
             ]}
           />
         </Card>
       </div>
+
+      <Modal 
+        title={`${studentData.info.fullName} 的个人词汇库`}
+        open={isWordModalVisible} 
+        onCancel={() => setIsWordModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Tabs defaultActiveKey="ALL" items={[
+          { key: 'ALL', label: '全部词汇', children: <Table dataSource={studentData.allWords} columns={wordColumns} pagination={{ pageSize: 5 }} /> },
+          { key: 'L1', label: <Tag color="red">初识 (LV.1)</Tag>, children: <Table dataSource={studentData.allWords.filter((w:any) => w.level === 1)} columns={wordColumns} pagination={{ pageSize: 5 }} /> },
+          { key: 'L2', label: <Tag color="orange">熟悉 (LV.2)</Tag>, children: <Table dataSource={studentData.allWords.filter((w:any) => w.level === 2)} columns={wordColumns} pagination={{ pageSize: 5 }} /> },
+          { key: 'L3', label: <Tag color="blue">巩固 (LV.3)</Tag>, children: <Table dataSource={studentData.allWords.filter((w:any) => w.level === 3)} columns={wordColumns} pagination={{ pageSize: 5 }} /> },
+          { key: 'L4_5', label: <Tag color="green">已牢记 (LV.4-5)</Tag>, children: <Table dataSource={studentData.allWords.filter((w:any) => w.level >= 4)} columns={wordColumns} pagination={{ pageSize: 5 }} /> },
+        ]} />
+      </Modal>
     </div>
   );
 }

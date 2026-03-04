@@ -26,8 +26,19 @@
       "role": "student",
       "fullName": "李雷",
       "classId": "c_A01",
+      "grade": "初一",
       "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Lilei",
       "createdAt": "2026-03-02T08:00:00Z"
+    },
+    {
+      "id": "s_102",
+      "email": "student02@qq.com",
+      "password": "123",
+      "role": "student",
+      "fullName": "韩梅梅",
+      "classId": "c_A01",
+      "grade": "高一",
+      "customAvatar": "https://api.dicebear.com/7.x/notionists/svg?seed=Hanmeimei"
     }
   ],
   "classes": [
@@ -60,6 +71,13 @@
       "unitCount": 1,
       "description": "系统自动聚合的 五年级 专属词库",
       "id": 3
+    },
+    {
+      "name": "高一",
+      "coverImage": "https://api.dicebear.com/7.x/shapes/svg?seed=高一",
+      "unitCount": 1,
+      "description": "系统自动聚合的 高一 专属词库",
+      "id": 4
     }
   ],
   "vocabularies": [
@@ -106,11 +124,302 @@
       "phonetic": "",
       "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
       "id": 4
+    },
+    {
+      "bookId": 4,
+      "word": "bow",
+      "partOfSpeech": "n.",
+      "translation": "鞠躬",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 5
+    },
+    {
+      "bookId": 4,
+      "word": "laser",
+      "partOfSpeech": "n.",
+      "translation": "激光",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 6
+    },
+    {
+      "bookId": 4,
+      "word": "robe",
+      "partOfSpeech": "n.",
+      "translation": "长袍",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 7
+    },
+    {
+      "bookId": 4,
+      "word": "loyalty",
+      "partOfSpeech": "n.",
+      "translation": "忠诚",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 8
+    },
+    {
+      "bookId": 4,
+      "word": "initmate",
+      "partOfSpeech": "adj.",
+      "translation": "亲密的",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 9
+    },
+    {
+      "bookId": 4,
+      "word": "velocity",
+      "partOfSpeech": "n.",
+      "translation": "速度",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 10
+    },
+    {
+      "bookId": 4,
+      "word": "plug",
+      "partOfSpeech": "n.",
+      "translation": "插头",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 11
+    },
+    {
+      "bookId": 4,
+      "word": "brush",
+      "partOfSpeech": "n.",
+      "translation": "画笔",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 12
+    },
+    {
+      "bookId": 4,
+      "word": "melon",
+      "partOfSpeech": "n.",
+      "translation": "瓜",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 13
+    },
+    {
+      "bookId": 4,
+      "word": "backward",
+      "partOfSpeech": "adj.",
+      "translation": "落后的",
+      "category": "高一",
+      "example": "",
+      "phonetic": "",
+      "audioUrl": "https://mock-audio-url.com/placeholder.mp3",
+      "id": 14
     }
   ],
   "word_examples": [],
-  "assignments": [],
+  "assignments": [
+    {
+      "classId": "c_A01",
+      "targetGrade": "初二",
+      "title": "text01",
+      "wordIds": [
+        2
+      ],
+      "deadline": "2026-03-04T16:00:00.000Z",
+      "createdAt": "2026-03-04T08:10:20.186Z",
+      "id": 1
+    },
+    {
+      "classId": "c_A01",
+      "targetGrade": "初一",
+      "title": "test",
+      "wordIds": [
+        1
+      ],
+      "deadline": "2026-03-03T16:00:00.000Z",
+      "createdAt": "2026-03-04T08:11:02.101Z",
+      "id": 2
+    },
+    {
+      "classId": "c_A01",
+      "targetGrade": "高一",
+      "title": "test1",
+      "wordIds": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "deadline": "2026-03-04T16:00:00.000Z",
+      "createdAt": "2026-03-04T12:52:25.362Z",
+      "id": 3
+    }
+  ],
   "assignment_words": [],
-  "student_task_records": [],
+  "student_task_records": [
+    {
+      "assignmentId": "3",
+      "studentId": "s_102",
+      "progress": 30,
+      "status": "in_progress",
+      "updatedAt": "2026-03-04T14:21:26.039Z",
+      "completedAt": "2026-03-04T14:15:49.762Z",
+      "id": 1
+    }
+  ],
+  "student_words": [
+    {
+      "id": "sw_001",
+      "studentId": "s_101",
+      "wordId": 1,
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "nextReviewDate": "2026-03-05T00:00:00Z",
+      "lastTestedAt": "2026-03-04T10:00:00Z"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "5",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T13:52:15.634Z"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "6",
+      "masteryLevel": 4,
+      "correctCount": 4,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:21:21.866Z",
+      "id": "bs1IqpB"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "7",
+      "masteryLevel": 3,
+      "correctCount": 3,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:21:24.700Z",
+      "id": "Na7si0s"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "8",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:33.843Z",
+      "id": "5l8KTRN"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "9",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:36.377Z",
+      "id": "yWoLKVB"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "10",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:39.018Z",
+      "id": "l6ksOMT"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "11",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:41.456Z",
+      "id": "wxLPl-4"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "12",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:43.904Z",
+      "id": "pyu3tJt"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "13",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:46.775Z",
+      "id": "X-W4GoE"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "14",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:15:49.352Z",
+      "id": "nZqeCcH"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "5",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:20:51.049Z",
+      "id": "TEKKs4p"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "5",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:21:07.083Z",
+      "id": "z_srHl9"
+    },
+    {
+      "studentId": "s_102",
+      "wordId": "5",
+      "masteryLevel": 1,
+      "correctCount": 1,
+      "wrongCount": 0,
+      "lastTestedAt": "2026-03-04T14:21:19.551Z",
+      "id": "_fLR1RH"
+    }
+  ],
   "learning_logs": []
 }
