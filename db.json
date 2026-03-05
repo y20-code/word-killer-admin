@@ -291,6 +291,15 @@
       "updatedAt": "2026-03-04T14:21:26.039Z",
       "completedAt": "2026-03-04T14:15:49.762Z",
       "id": 1
+    },
+    {
+      "assignmentId": "2",
+      "studentId": "s_101",
+      "progress": 100,
+      "status": "completed",
+      "updatedAt": "2026-03-05T02:08:18.389Z",
+      "completedAt": "2026-03-05T02:08:18.389Z",
+      "id": 2
     }
   ],
   "student_words": [
@@ -298,11 +307,11 @@
       "id": "sw_001",
       "studentId": "s_101",
       "wordId": 1,
-      "masteryLevel": 1,
-      "correctCount": 1,
+      "masteryLevel": 2,
+      "correctCount": 2,
       "wrongCount": 0,
       "nextReviewDate": "2026-03-05T00:00:00Z",
-      "lastTestedAt": "2026-03-04T10:00:00Z"
+      "lastTestedAt": "2026-03-05T02:08:17.981Z"
     },
     {
       "studentId": "s_102",
