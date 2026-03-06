@@ -10,6 +10,7 @@ import Settings from './pages/Settings';
 import Assignment from './pages/Assignment';
 import Report from './/pages/Report';
 import DictionaryAdmin from "./components/DictionaryAdmin";
+import CreateClass from './pages/CreateClass';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         >
           {/* 下面这些组件，都会被塞进 MainLayout 的 <Outlet /> 里面！ */}
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/classes/create" element={<CreateClass />} />
           <Route path="/students" element={<StudentList />} />
           <Route path="/students/:id" element={<StudentDetail />} />
           <Route path="/assignments" element={<Assignment />} />

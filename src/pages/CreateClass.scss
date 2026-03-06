@@ -1,0 +1,63 @@
+/* src/pages/CreateClass.scss */
+
+/* 🌟 核心卡片：大厂级悬浮阴影与圆角 */
+.custom-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04); /* 极其克制的科技蓝灰阴影 */
+  border: 1px solid #f1f5f9; /* 极细的边框增加质感 */
+  background-color: #ffffff;
+  padding: 12px;
+  transition: all 0.3s ease;
+
+  /* 🌟 优化 Ant Design 的步骤条 (Steps) */
+  .ant-steps {
+    .ant-steps-item-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .ant-steps-item-description {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+  }
+
+  /* 🌟 表单区域优化 */
+  .ant-form-item-label > label {
+    font-weight: 500;
+    color: #475569;
+  }
+
+  /* 🌟 动态名册表格优化 (Table) */
+  .ant-table-wrapper {
+    /* 让表头看起来更清爽，符合现代 SaaS 审美 */
+    .ant-table-thead > tr > th {
+      background-color: #f8fafc; 
+      color: #334155;
+      font-weight: 600;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    /* 斑马纹微调（可选） */
+    .ant-table-tbody > tr:hover > td {
+      background-color: #f0fdf4 !important; /* 鼠标悬浮时给一个极其微弱的护眼绿反馈 */
+    }
+  }
+
+  /* 🌟 结果页 (Result) 居中与间距优化 */
+  .ant-result {
+    padding: 48px 0;
+    
+    .ant-result-title {
+      color: #0f172a;
+      font-weight: bold;
+    }
+    .ant-result-subtitle {
+      font-size: 15px;
+      color: #64748b;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+  }
+}

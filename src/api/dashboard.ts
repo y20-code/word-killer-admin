@@ -1,47 +1,131 @@
 import request from '../utils/request';
 
 export const fetchDashboardData = async (teacherId: string) => {
-  try {
-    // 2. 🏆 不需要再写 localhost:3000 了，因为 request.ts 里已经配置了 baseURL
-    const [classes, assignments, logs] = await Promise.all([
-      request.get(`/classes?teacherId=${teacherId}`)as Promise<any[]>,
-      request.get(`/assignments`) as Promise<any[]>,
-      request.get(`/learning_logs`) as Promise<any[]>
-    ]);
+  // 1. 获取老师管理的班级
+  const classes = await request.get(`/classes?teacherId=${teacherId}`) as any[];
+  const classIds = classes.map(c => c.id);
 
-    // 3. 🏆 致命细节大修：因为拦截器里写了 return response.data，
-    // 所以这里的 classes 已经是数组了，千万不要再写 classesRes.data！
-    
-    // 下面的数据清洗逻辑一字不改
-    const classIds = classes.map((c: any) => c.id);
-    const teacherAssignments = assignments.filter((a: any) => classIds.includes(a.classId));
-    
-    const totalLogs = logs.length;
-    const correctLogs = logs.filter((log: any) => log.isCorrect).length;
-    const avgCorrectRate = totalLogs > 0 ? Math.round((correctLogs / totalLogs) * 100) : 0;
+  // 2. 并发拉取所有的底层数据
+  const [allStudents, allAssignments, allRecords, allWords] = await Promise.all([
+    request.get(`/users?role=student`) as Promise<any[]>,
+    request.get(`/assignments`) as Promise<any[]>,
+    request.get(`/student_task_records`) as Promise<any[]>,
+    request.get(`/student_words`) as Promise<any[]>
+  ]);
 
-    const chartData = classes.map((cls: any) => {
-       const clsAssignments = teacherAssignments.filter((a:any) => a.classId === cls.id);
-       const mockProgress = clsAssignments.length > 0 ? 85 : 0; 
-       
-       return {
-           name: cls.name,
-           value: mockProgress,
-           itemStyle: { color: mockProgress > 80 ? '#1677ff' : '#94a3b8' } 
-       };
+  // 3. 过滤出属于当前老师的数据
+  const myStudents = allStudents.filter(u => classIds.includes(u.classId));
+  const studentIds = myStudents.map(s => s.id);
+  const myAssignments = allAssignments.filter(a => classIds.includes(a.classId));
+  const myRecords = allRecords.filter(r => studentIds.includes(String(r.studentId)));
+  const myWords = allWords.filter(w => studentIds.includes(String(w.studentId)));
+
+  // --- 🌟 计算顶部 3 个数据卡片 ---
+  const activeClassCount = classes.length;
+  const pendingAssignmentCount = myAssignments.length;
+
+  let totalCorrect = 0;
+  let totalAnswers = 0;
+  myWords.forEach(w => {
+    totalCorrect += w.correctCount || 0;
+    totalAnswers += (w.correctCount || 0) + (w.wrongCount || 0);
+  });
+  const avgCorrectRate = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
+
+  // --- 🌟 计算今日安排 (取最近布置的 3 个作业) ---
+  const recentAssignments = [...myAssignments]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3)
+    .map(a => {
+        const cls = classes.find(c => c.id === a.classId);
+        const timeStr = new Date(a.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return {
+            id: a.id,
+            time: timeStr,
+            title: a.title,
+            desc: `${cls?.name || '未知班级'} - ${a.targetGrade}词汇`
+        };
     });
 
-    return {
-      activeClassCount: classes.length,
-      pendingAssignmentCount: teacherAssignments.length,
-      avgCorrectRate: avgCorrectRate,
-      chartData: chartData.length > 0 ? chartData : [{ name: '暂无班级', value: 0 }]
-    };
+  // ==================== 🌟 核心新增：高频易错词汇统计（算多少人不会） ====================
+  // 刚才的 alerts 逻辑已经被我们彻底干掉了，这里是全新的数据教研核心！
+  const hardWordsMap: Record<string, Set<string>> = {};
 
-  } catch (error) {
-    // 因为你在 request.ts 里已经做了全局的 message.error 提示，
-    // 这里其实连 console.error 都可以省了，交给全局处理就行！
-    console.error("获取大盘数据失败:", error);
-    throw error;
-  }
+  myWords.forEach(w => {
+    // 只要有错题记录，就把它抓出来
+    if (Number(w.wrongCount) > 0) {
+      if (!hardWordsMap[w.word]) {
+        hardWordsMap[w.word] = new Set(); // 用 Set 防止同一个学生错多次被重复计算
+      }
+      hardWordsMap[w.word].add(String(w.studentId)); // 记录“谁”不会这个词
+    }
+  });
+
+  // 转换为数组，按“不会的人数”从高到低排序，只取前 5 名最惨烈的词！
+  const hardWords = Object.keys(hardWordsMap).map(word => ({
+    word: word,
+    count: hardWordsMap[word].size
+  }))
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 5);
+  // ====================================================================================
+
+  // --- 🌟 计算昨日未通关名单及完成率 (给中间的进度条列表用) ---
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toDateString();
+
+  const yesterdayAssignments = myAssignments.filter(a => 
+    new Date(a.createdAt).toDateString() === yesterdayStr
+  );
+
+  const chartData = classes.map(cls => {
+    const clsAssignments = yesterdayAssignments.filter(a => a.classId === cls.id);
+    const clsStudents = myStudents.filter(s => s.classId === cls.id);
+    
+    let slackers: any[] = [];
+    
+    if (clsAssignments.length > 0) {
+      clsStudents.forEach(stu => {
+        let currentProgress = 100;
+        let finishedAll = true;
+
+        const studentAssignments = clsAssignments.filter(a => a.targetGrade === stu.grade);
+        if (studentAssignments.length > 0) {
+          studentAssignments.forEach(assign => {
+            const record = myRecords.find(r => String(r.assignmentId) === String(assign.id) && String(r.studentId) === String(stu.id));
+            if (!record || Number(record.progress) < 100) {
+              finishedAll = false;
+              currentProgress = record ? Number(record.progress) : 0;
+            }
+          });
+
+          if (!finishedAll) {
+            slackers.push({ id: stu.id, name: stu.fullName, progress: currentProgress });
+          }
+        }
+      });
+    }
+
+    const totalStudents = clsStudents.length;
+    let completionRate = 0;
+    if (clsAssignments.length > 0 && totalStudents > 0) {
+      completionRate = Math.round(((totalStudents - slackers.length) / totalStudents) * 100);
+    }
+
+    return { 
+      name: cls.name, 
+      value: completionRate, 
+      slackers: slackers     
+    };
+  });
+
+  return {
+    activeClassCount,
+    pendingAssignmentCount,
+    avgCorrectRate,
+    chartData, 
+    recentAssignments, 
+    hardWords // 👈 传出最新出炉的易错词榜单！
+  };
 };

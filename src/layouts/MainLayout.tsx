@@ -24,13 +24,13 @@ export default function MainLayout() {
     }, []);
 
   // 🏆 核心：将 menu 的 key 直接设置为路由路径！
-  const menuItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: '班级概览' },
-    { key: '/students', icon: <TeamOutlined />, label: '学生列表' },
-    { key: '/assignments', icon: <BookOutlined />, label: '作业布置' },
-    { key: '/reports', icon: <BarChartOutlined />, label: '数据报告' },
-    { key: '/settings', icon: <SettingOutlined />, label: '设置' },
-  ];
+    const menuItems = [
+      { key: '/dashboard', icon: <DashboardOutlined />, label: '班级概览' },
+      { key: '/students', icon: <TeamOutlined />, label: '学生列表' },
+      { key: '/assignments', icon: <BookOutlined />, label: '作业布置' },
+      { key: '/reports', icon: <BarChartOutlined />, label: '数据报告' },
+      { key: '/settings', icon: <SettingOutlined />, label: '设置' },
+    ];
 
   const displayName = currentUser?.fullName || currentUser?.email?.split('@')[0] || '加载中...';
   const avatarUrl = currentUser?.customAvatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${currentUser?.email || 'default'}`;
