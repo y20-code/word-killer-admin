@@ -7,6 +7,7 @@ import {
 import { useUserStore } from '../store/userStore';
 import { useNavigate } from 'react-router-dom';
 import { fetchDashboardData } from '../api/dashboard';
+import StatCard from '../components/statCard'
 import './Dashboard.scss';
 
 const { Title, Text } = Typography;
@@ -57,23 +58,9 @@ export default function Dashboard() {
     return (
         <div className="dashboard-container">
           <Row gutter={[24, 24]}>
-            <Col xs={24} sm={8}>
-              <Card bordered={false} className="custom-card">
-                <div className="stat-card-body">
-                  <Avatar size={54} className="avatar-blue" icon={<TeamOutlined />} />
-                  <div>
-                    <Text type="secondary">
-                      活跃班级
-                    </Text>
-                    <Title level={2}>
-                      {stats.activeClassCount}
-                    </Title>
-                  </div>
-                </div>
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}><Card bordered={false} className="custom-card"><div className="stat-card-body"><Avatar size={54} className="avatar-orange" icon={<BookOutlined />} /><div><Text type="secondary">本班已发作业</Text><Title level={2}>{stats.pendingAssignmentCount}</Title></div></div></Card></Col>
-            <Col xs={24} sm={8}><Card bordered={false} className="custom-card"><div className="stat-card-body"><Avatar size={54} className="avatar-green" icon={<BarChartOutlined />} /><div><Text type="secondary">全局平均正确率</Text><Title level={2}>{stats.avgCorrectRate}%</Title></div></div></Card></Col>
+            <StatCard icon={<TeamOutlined />} title={"活跃班级"} value={stats.activeClassCount} colorClass='avatar-blue'/>
+            <StatCard icon={<BookOutlined/>} title={"作业记录"} value={stats.pendingAssignmentCount} colorClass='avatar-orange'/>
+            <StatCard icon={<BarChartOutlined/>} title={"平均正确率"} value={stats.avgCorrectRate + '%'} colorClass='avatar-green'/>
           </Row>
 
           <Row style={{ marginTop: 24 }}>
