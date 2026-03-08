@@ -33,7 +33,9 @@ export default function StudentList() {
     useEffect(() => {
       const loadData = async () => {
         if (!currentUser?.id) return;
+        
         setIsLoading(true);
+        
         try {
           const data = await fetchTeacherStudents(currentUser.id);
           setStudentList(data.students);

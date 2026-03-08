@@ -1,10 +1,12 @@
 import request from '../utils/request';
 
+import type { ClassInfo,StudentInfo } from '../types';
+
 export const fetchTeacherStudents = async (teacherId: string) => {
-  const classes = await request.get(`/classes?teacherId=${teacherId}`) as any[];
+  const classes = await request.get(`/classes?teacherId=${teacherId}`) as ClassInfo[];
   const classIds = classes.map(c => c.id);
 
-  const allUsers = await request.get(`/users?role=student`) as any[];
+  const allUsers = await request.get(`/users?role=student`) as StudentInfo[];
   const myStudents = allUsers.filter(u => classIds.includes(u.classId));
 
   const taskRecords = await request.get(`/student_task_records`) as any[];
