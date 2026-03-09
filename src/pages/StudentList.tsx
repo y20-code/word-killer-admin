@@ -6,6 +6,8 @@ import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { fetchTeacherStudents } from '../api/student';
+
+import StateCard from '../components/statCard';
 import './StudentList.scss';
 
 const { Title, Text } = Typography;
@@ -35,7 +37,7 @@ export default function StudentList() {
         if (!currentUser?.id) return;
         
         setIsLoading(true);
-        
+
         try {
           const data = await fetchTeacherStudents(currentUser.id);
           setStudentList(data.students);
@@ -116,44 +118,9 @@ export default function StudentList() {
     <div className="student-list-container">
       {/* 顶部数据卡片 */}
       <Row gutter={[24, 24]}>
-        <Col xs={24} sm={8}>
-          <Card bordered={false} className="stat-card">
-            <div className="stat-card-body">
-              <div className="stat-card__icon-box stat-card__icon-box--blue"><Users size={28} /></div>
-              <div className="stat-card__content">
-                <Text type="secondary" className="label">学生总数</Text>
-                {/* 动态数字注入！ */}
-                <Title level={3} className="value">{stats.totalStudents}</Title> 
-              </div>
-            </div>
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={8}>
-          <Card bordered={false} className="stat-card">
-            <div className="stat-card-body">
-              <div className="stat-card__icon-box stat-card__icon-box--emerald"><TrendingUp size={28} /></div>
-              <div className="stat-card__content">
-                <Text type="secondary" className="label">平均进度</Text>
-                {/* 动态进度注入！ */}
-                <Title level={3} className="value">{stats.avgProgress}%</Title>
-              </div>
-            </div>
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={8}>
-          <Card bordered={false} className="stat-card">
-            <div className="stat-card-body">
-              <div className="stat-card__icon-box stat-card__icon-box--orange"><Zap size={28} /></div>
-              <div className="stat-card__content">
-                <Text type="secondary" className="label">今日活跃</Text>
-                {/* 随便写个运算让它看起来逼真点 */}
-                <Title level={3} className="value">{stats.totalStudents > 0 ? 1 : 0}</Title>
-              </div>
-            </div>
-          </Card>
-        </Col>
+        <StateCard icon={<Users/>} title={"学生总数"} value={stats.totalStudents} colorClass='stat-card__icon-box--blue'/>
+        <StateCard icon={<TrendingUp/>} title={"平均进度"} value={stats.totalStudents} colorClass='stat-card__icon-box--emerald'/>
+        <StateCard icon={<Zap/>} title={"今日活跃"} value={stats.totalStudents} colorClass='stat-card__icon-box--orange'/>
       </Row>
 
       {/* 学生目录表格 */}

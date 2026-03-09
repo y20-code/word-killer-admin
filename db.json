@@ -1294,6 +1294,58 @@
       "isPersonalized": true,
       "createdAt": "2026-03-06T03:00:38.101Z",
       "id": 3
+    },
+    {
+      "classId": "c_801",
+      "targetGrade": "初二",
+      "title": "初二1班 03月09日 词汇任务",
+      "wordIds": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "deadline": "2026-03-10T15:59:59.999Z",
+      "isPersonalized": true,
+      "createdAt": "2026-03-09T04:43:06.326Z",
+      "id": 4
+    },
+    {
+      "classId": "c_802",
+      "targetGrade": "初二",
+      "title": "初二2班 03月09日 词汇任务",
+      "wordIds": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "deadline": "2026-03-10T15:59:59.999Z",
+      "isPersonalized": true,
+      "createdAt": "2026-03-09T04:43:06.327Z",
+      "id": 5
     }
   ],
   "student_task_records": [

@@ -1,6 +1,6 @@
 import request from '../utils/request';
 
-import type { ClassInfo,StudentInfo } from '../types';
+import type { ClassInfo,StudentInfo,TaskInfo,WordRecord } from '../types';
 
 export const fetchTeacherStudents = async (teacherId: string) => {
   const classes = await request.get(`/classes?teacherId=${teacherId}`) as ClassInfo[];
@@ -9,8 +9,8 @@ export const fetchTeacherStudents = async (teacherId: string) => {
   const allUsers = await request.get(`/users?role=student`) as StudentInfo[];
   const myStudents = allUsers.filter(u => classIds.includes(u.classId));
 
-  const taskRecords = await request.get(`/student_task_records`) as any[];
-  const studentWords = await request.get(`/student_words`) as any[]; 
+  const taskRecords = await request.get(`/student_task_records`) as TaskInfo[];
+  const studentWords = await request.get(`/student_words`) as WordRecord[]; 
 
   let totalProgressSum = 0;
   let validProgressCount = 0;
