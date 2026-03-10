@@ -15,30 +15,42 @@ export const fetchTeacherStudents = async (teacherId: string) => {
   let totalProgressSum = 0;
   let validProgressCount = 0;
 
+  // 小工具：提取合法时间戳，避免出现缺字段时直接显示“今天”
+  const pushIfValidDate = (collector: number[], value?: string) => {
+    if (!value) return;
+    const ts = new Date(value).getTime();
+    if (!Number.isNaN(ts)) collector.push(ts);
+  };
+
   const studentData = myStudents.map(student => {
     const myRecords = taskRecords.filter(record => String(record.studentId) === String(student.id));
-    let lastActiveDate = '暂无活动';
+    const activityTimestamps: number[] = [];
 
-    if (myRecords.length > 0) {
-      const sortedRecords = [...myRecords].sort((a, b) => {
-        const timeA = new Date(a.updatedAt || a.completedAt || 0).getTime();
-        const timeB = new Date(b.updatedAt || b.completedAt || 0).getTime();
-        return timeB - timeA;
-      });
-      const latest = sortedRecords[0];
-      lastActiveDate = latest.updatedAt ? latest.updatedAt.split('T')[0] : (latest.completedAt ? latest.completedAt.split('T')[0] : '今天');
+    // 1) 任务记录里的时间（优先）
+    myRecords.forEach(record => {
+      pushIfValidDate(activityTimestamps, record.updatedAt);
+      pushIfValidDate(activityTimestamps, record.completedAt);
+      // 兼容没有 updated/completed 字段但后端可能未来加的 createdAt
+      // @ts-ignore
+      pushIfValidDate(activityTimestamps, record.createdAt);
 
-      myRecords.forEach(record => {
-        totalProgressSum += Number(record.progress) || 0;
-        validProgressCount++;
-      });
-    }
+      totalProgressSum += Number(record.progress) || 0;
+      validProgressCount++;
+    });
 
     const myWordsInDB = studentWords.filter(sw => String(sw.studentId) === String(student.id));
     
+    // 2) 词汇练习的最后测试时间也算“活跃”
+    myWordsInDB.forEach(sw => pushIfValidDate(activityTimestamps, sw.lastTestedAt));
+
     // 🛡️ 绝杀防御 1：用 Set 提取独一无二的 wordId，彻底挤干水分！
     const uniqueWordIds = new Set(myWordsInDB.map(sw => String(sw.wordId)));
     const realTotalWords = uniqueWordIds.size; // 这才是真实的掌握词汇量！
+
+    // 3) 格式化最近活跃时间（无记录时返回“暂无活动”，不再默认“今天”）
+    const lastActiveDate = activityTimestamps.length > 0
+      ? new Date(Math.max(...activityTimestamps)).toISOString().split('T')[0]
+      : '暂无活动';
 
     return {
       key: student.id,
