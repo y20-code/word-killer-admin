@@ -49,6 +49,10 @@ export default function Dashboard() {
     }, [currentUser]);
 
     const onClassClick = (item: any) => {
+        if (!item.hasAssignment) {
+            message.info('昨日未布置作业，无需查看名单');
+            return;
+        }
         setModalData({ className: item.name, slackers: item.slackers });
         setIsModalVisible(true);
     };

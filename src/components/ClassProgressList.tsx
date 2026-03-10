@@ -27,16 +27,21 @@ export default function ClassProgressList({data,onItemClick} : ClassProgressProp
                       renderItem={item => {
                         const rate = item.value; 
                         const slackersCount = item.slackers.length; 
-                        
-                        let color = '#ef4444'; 
-                        let status: 'exception' | 'success' | 'normal' = 'exception';
-                        
-                        if (rate >= 80) {
-                          color = '#10b981'; 
-                          status = 'success';
-                        } else if (rate >= 60) {
-                          color = '#f59e0b'; 
-                          status = 'normal';
+                        const hasAssignment = item.hasAssignment;
+
+                        let color = '#94a3b8'; // 默认灰色（未布置）
+                        let status: 'exception' | 'success' | 'normal' = 'normal';
+
+                        if (hasAssignment) {
+                          color = '#ef4444';
+                          status = 'exception';
+                          if (rate >= 80) {
+                            color = '#10b981'; 
+                            status = 'success';
+                          } else if (rate >= 60) {
+                            color = '#f59e0b'; 
+                            status = 'normal';
+                          }
                         }
 
                         return (
@@ -61,17 +66,28 @@ export default function ClassProgressList({data,onItemClick} : ClassProgressProp
                               </div>
                               
                               <div style={{ width: '55%' }}>
-                                <Progress percent={rate} strokeColor={color} status={status} strokeWidth={12} />
+                                <Progress 
+                                  percent={hasAssignment ? rate : 0} 
+                                  strokeColor={color} 
+                                  status={status} 
+                                  strokeWidth={12} 
+                                />
                               </div>
                               
                               <div style={{ width: '25%', textAlign: 'right' }}>
-                                {slackersCount > 0 ? (
-                                  <Tag color="error" style={{ fontSize: '15px', padding: '6px 16px', borderRadius: '16px', border: 'none', backgroundColor: '#fee2e2', color: '#ef4444' }}>
-                                    未完成 {slackersCount} 人
-                                  </Tag>
+                                {hasAssignment ? (
+                                  slackersCount > 0 ? (
+                                    <Tag color="error" style={{ fontSize: '15px', padding: '6px 16px', borderRadius: '16px', border: 'none', backgroundColor: '#fee2e2', color: '#ef4444' }}>
+                                      未完成 {slackersCount} 人
+                                    </Tag>
+                                  ) : (
+                                    <Tag color="success" style={{ fontSize: '15px', padding: '6px 16px', borderRadius: '16px', border: 'none', backgroundColor: '#dcfce7', color: '#22c55e' }}>
+                                      全员完成 🎉
+                                    </Tag>
+                                  )
                                 ) : (
-                                  <Tag color="success" style={{ fontSize: '15px', padding: '6px 16px', borderRadius: '16px', border: 'none', backgroundColor: '#dcfce7', color: '#22c55e' }}>
-                                    全员完成 🎉
+                                  <Tag color="default" style={{ fontSize: '15px', padding: '6px 16px', borderRadius: '16px', border: 'none', backgroundColor: '#e2e8f0', color: '#475569' }}>
+                                    昨日未布置作业
                                   </Tag>
                                 )}
                               </div>

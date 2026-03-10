@@ -3,6 +3,7 @@ import { Card, Form, Select, DatePicker, Button, Transfer, message, Row, Col, Ty
 import { BookOutlined, SendOutlined, ThunderboltOutlined, RobotOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useUserStore } from '../store/userStore';
 import { fetchClasses, fetchWordbooks, fetchVocabularies, createAssignment } from '../api/assignment';
+import request from '../utils/request';
 import dayjs from 'dayjs'; 
 
 const { Text } = Typography;
@@ -12,6 +13,15 @@ interface TransferItem {
   title: string;
   description: string;
 }
+
+type StudentWord = {
+  studentId: string;
+  wordId: number;
+  correctCount: number;
+  wrongCount: number;
+  lastTestedAt?: string;
+  masteryLevel?: number;
+};
 
 export default function Assignment() {
   const [form] = Form.useForm();
@@ -48,6 +58,7 @@ export default function Assignment() {
     initData();
   }, [currentUser]);
 
+  // 根据已布置的作业过滤掉“发过的单词”，并尝试自动匹配词书
   const handleClassesChange = async (selectedClassIds: string[]) => {
     form.setFieldsValue({ wordbookId: undefined });
     setVocabularies([]);
@@ -62,8 +73,7 @@ export default function Assignment() {
 
     setIsFetchingWords(true);
     try {
-      const assignRes = await fetch('http://localhost:3002/assignments');
-      const allAssignments = await assignRes.json();
+      const allAssignments = await request.get<any[]>('/assignments');
       
       const usedIds = new Set<number>();
       allAssignments.forEach((a: any) => {
@@ -71,9 +81,10 @@ export default function Assignment() {
           a.wordIds.forEach((id: number) => usedIds.add(id));
         }
       });
-      setLearnedWordIds(Array.from(usedIds)); 
+      const usedIdArray = Array.from(usedIds);
+      setLearnedWordIds(usedIdArray); // ⚠️ state 异步，下面直接用局部变量
 
-      let allDetectedGrades = new Set<string>(); 
+      const allDetectedGrades = new Set<string>(); 
       for (const classId of selectedClassIds) {
         const targetClass = classes.find(c => c.id === classId);
         const className = targetClass?.name || ''; 
@@ -82,14 +93,13 @@ export default function Assignment() {
         let detectedGrade = possibleGrades.find(g => className.includes(g));
 
         if (!detectedGrade) {
-          const res = await fetch(`http://localhost:3002/users?role=student&classId=${classId}`);
-          const students = await res.json();
+          const students = await request.get<any[]>(`/users?role=student&classId=${classId}`);
           const studentGrades = Array.from(new Set(students.map((s: any) => s.grade).filter(Boolean))) as string[];
           if (studentGrades.length === 1) detectedGrade = studentGrades[0];
         }
 
         if (detectedGrade) {
-          let searchKeywords = [detectedGrade];
+          const searchKeywords = [detectedGrade];
           if (detectedGrade === '初一') searchKeywords.push('七年级');
           if (detectedGrade === '初二') searchKeywords.push('八年级');
           if (detectedGrade === '初三') searchKeywords.push('九年级');
@@ -118,7 +128,8 @@ export default function Assignment() {
         } else {
           message.success(`已为选中的班级自动加载【${autoBook.name}】专属词库！`);
         }
-        handleWordbookChange(autoBook.id); 
+        // 传入刚算好的 usedIdArray，避免因 setState 异步导致旧值渲染
+        handleWordbookChange(autoBook.id, usedIdArray); 
       }
     } catch (error) {
       console.error(error);
@@ -128,7 +139,8 @@ export default function Assignment() {
     }
   };
 
-  const handleWordbookChange = async (bookId: string) => {
+  const handleWordbookChange = async (bookId: string, overrideLearned?: number[]) => {
+    const learnedPool = overrideLearned ?? learnedWordIds;
     setIsFetchingWords(true);
     try {
       const currentBook = wordbooks.find(b => b.id === bookId);
@@ -138,7 +150,7 @@ export default function Assignment() {
 
       const words = await fetchVocabularies(bookId);
       
-      const freshWords = words.filter((w: any) => !learnedWordIds.includes(w.id));
+      const freshWords = words.filter((w: any) => !learnedPool.includes(w.id));
 
       const transferData = await Promise.all(freshWords.map(async (v: any) => {
         return {
@@ -191,6 +203,29 @@ export default function Assignment() {
     return today.add(1, 'day').endOf('day');
   };
 
+  // 基于简单记忆算法的“到期复习”判定：越熟练间隔越长
+  const needsReview = (record: StudentWord) => {
+    const correct = Number(record.correctCount || 0);
+    const wrong = Number(record.wrongCount || 0);
+    const total = correct + wrong;
+    const correctRate = total > 0 ? correct / total : 0;
+
+    // 估算熟练度等级（0-6），支持后端传入 masteryLevel
+    const derivedLevel = Math.round(correctRate * 5);
+    const level = Math.max(0, Math.min(6, Number(record.masteryLevel ?? derivedLevel)));
+
+    // 间隔表：新词当天，随后 1/2/4/7/14/30 天
+    const intervals = [0, 1, 2, 4, 7, 14, 30];
+    const lastTested = record.lastTestedAt ? dayjs(record.lastTestedAt) : null;
+    const nextDue = lastTested
+      ? lastTested.add(intervals[level], 'day').endOf('day')
+      : dayjs(0); // 从未测过 -> 立即复习
+
+    // 低正确率或完全未测，直接视为到期
+    if (total === 0 || correctRate < 0.7) return true;
+    return dayjs().isAfter(nextDue);
+  };
+
   const handleFinish = async (values: any) => {
     if (targetKeys.length === 0) {
       return message.warning('请至少在下方词库中选取一个单词！');
@@ -200,17 +235,40 @@ export default function Assignment() {
     try {
       const finalDeadline = values.deadline ? dayjs(values.deadline) : calculateDefaultDeadline();
       const dateStr = dayjs().format('MM月DD日');
+      const baseNewWords = targetKeys.map(Number);
 
-      const promises = values.classIds.map((classId: string) => {
+      // 预拉取学生与练习数据，避免循环内多次请求
+      const needAdaptive = Boolean(values.enablePersonalization);
+      const allStudentWords = needAdaptive ? await request.get<StudentWord[]>('/student_words') : [];
+
+      const promises = values.classIds.map(async (classId: string) => {
         const targetClass = classes.find(c => c.id === classId);
         const className = targetClass ? targetClass.name : '未知班级';
         const autoTitle = `${className} ${dateStr} 词汇任务`;
+
+        // 计算本班的“未掌握词”集合
+        let reviewWordIds: number[] = [];
+        if (needAdaptive) {
+          const students = await request.get<any[]>(`/users?role=student&classId=${classId}`);
+          const studentIds = new Set(students.map((s: any) => String(s.id)));
+          const reviewSet = new Set<number>();
+          allStudentWords.forEach((sw: StudentWord) => {
+            if (studentIds.has(String(sw.studentId)) && needsReview(sw)) {
+              reviewSet.add(Number(sw.wordId));
+            }
+          });
+          reviewWordIds = Array.from(reviewSet);
+        }
+
+        // 合并基础新词 + 复习词，去重
+        const mergedWordIds = Array.from(new Set([...baseNewWords, ...reviewWordIds]));
 
         const payload = {
           classId: classId,
           targetGrade: selectedGrade, 
           title: autoTitle, 
-          wordIds: targetKeys.map(Number), 
+          wordIds: mergedWordIds, 
+          reviewWordIds, // 方便后端/分析直接拿到复习词来源
           deadline: finalDeadline.toISOString(), 
           isPersonalized: values.enablePersonalization, 
           createdAt: new Date().toISOString()
@@ -286,7 +344,13 @@ export default function Assignment() {
             {/* 左边：选择词库 */}
             <div style={{ flex: '1 1 auto', minWidth: '220px' }}>
               <Form.Item name="wordbookId" style={{ marginBottom: 0 }}>
-                <Select placeholder="切换词库" style={{ width: '100%' }} onChange={handleWordbookChange} size="middle" loading={isFetchingWords}>
+                <Select 
+                  placeholder="切换词库" 
+                  style={{ width: '100%' }} 
+                  onChange={(value) => handleWordbookChange(value as string)}
+                  size="middle" 
+                  loading={isFetchingWords}
+                >
                   {availableWordbooks.map(b => <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>)}
                 </Select>
               </Form.Item>

@@ -71,21 +71,25 @@ export const fetchDashboardData = async (teacherId: string) => {
   // ====================================================================================
 
   // --- 🌟 计算昨日未通关名单及完成率 (给中间的进度条列表用) ---
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toDateString();
+  // 取统计日期：平日看昨天，周一回看上周五
+  const statDate = new Date();
+  const todayWeekday = statDate.getDay(); // 0-6, 周日=0
+  const delta = todayWeekday === 1 ? 3 : 1; // 周一 -> 看周五
+  statDate.setDate(statDate.getDate() - delta);
+  const statDateStr = statDate.toDateString();
 
   const yesterdayAssignments = myAssignments.filter(a => 
-    new Date(a.createdAt).toDateString() === yesterdayStr
+    new Date(a.createdAt).toDateString() === statDateStr
   );
 
   const chartData = classes.map(cls => {
     const clsAssignments = yesterdayAssignments.filter(a => a.classId === cls.id);
     const clsStudents = myStudents.filter(s => s.classId === cls.id);
     
-    let slackers: any[] = [];
-    
-    if (clsAssignments.length > 0) {
+    const slackers: any[] = [];
+    const hasAssignment = clsAssignments.length > 0;
+
+    if (hasAssignment) {
       clsStudents.forEach(stu => {
         let currentProgress = 100;
         let finishedAll = true;
@@ -109,14 +113,16 @@ export const fetchDashboardData = async (teacherId: string) => {
 
     const totalStudents = clsStudents.length;
     let completionRate = 0;
-    if (clsAssignments.length > 0 && totalStudents > 0) {
+    if (hasAssignment && totalStudents > 0) {
       completionRate = Math.round(((totalStudents - slackers.length) / totalStudents) * 100);
     }
 
     return { 
       name: cls.name, 
       value: completionRate, 
-      slackers: slackers     
+      slackers: slackers,
+      hasAssignment,
+      statDate: statDateStr
     };
   });
 

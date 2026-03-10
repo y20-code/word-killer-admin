@@ -1,12 +1,21 @@
 // src/utils/request.ts
-import axios from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { message } from 'antd';
+
+// 扩展 Axios 类型：让 request.get/post 直接返回解包后的数据而非 AxiosResponse
+interface DataAxiosInstance extends AxiosInstance {
+  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+}
 
 // 1. 创建 Axios 实例
 const request = axios.create({
   baseURL: 'http://localhost:3002',
   timeout: 10000, // 请求超时时间 (10秒)
-});
+}) as DataAxiosInstance;
 
 // 2. 请求拦截器 (Request Interceptor)
 request.interceptors.request.use(
@@ -25,10 +34,10 @@ request.interceptors.request.use(
 
 // 3. 响应拦截器 (Response Interceptor)
 request.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse) => {
     // 💡 只要 HTTP 状态码是 2xx，就会进入这里
-    // 大厂通常会在这里剥离最外层的 code/msg 结构，直接返回 data
-    return response.data;
+    // 剥离最外层，返回解包后的 data，并维持泛型 T
+    return response.data as any;
   },
   (error) => {
     // 💡 HTTP 状态码是非 2xx，会进入这里统一处理错误
