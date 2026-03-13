@@ -85,3 +85,67 @@ CREATE TABLE Word_Examples(
 	FOREIGN KEY (wordId) REFERENCES Vocabularies(id)
 );
 
+#任务表 (Assignments)
+CREATE TABLE Assignments(
+	id VARCHAR(36) PRIMARY KEY ,
+    classId VARCHAR(36) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    deadline DATETIME NOT NULL,
+    createdAt DATETIME ,
+    FOREIGN KEY (classId) REFERENCES Classes(id)
+);
+
+#任务清单明细表 (Assignment_Words)
+CREATE TABLE Assignment_Words(
+	id VARCHAR(36) PRIMARY KEY,
+    assignmentId VARCHAR(36) NOT NULL,
+    wordId VARCHAR(36) NOT NULL,
+    exampleId VARCHAR(36),
+    FOREIGN KEY (assignmentId) REFERENCES Assignments(id),
+    FOREIGN KEY (wordId) REFERENCES Vocabularies(id),
+    FOREIGN KEY (exampleId) REFERENCES Word_Examples(id),
+    UNIQUE(assignmentId,wordId)
+);
+
+
+#任务进度表 (Assignment_Progress)
+CREATE TABLE Assignment_Progress(
+	id VARCHAR(36) PRIMARY KEY,
+    assignmentId VARCHAR(36) NOT NULL,
+    studentId VARCHAR(36) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending', 
+    progress INT DEFAULT 0,
+    score INT,
+    completedAt DATETIME,
+    FOREIGN KEY (assignmentId) REFERENCES Assignments(id),
+    FOREIGN KEY (studentId) REFERENCES Users(id),
+    UNIQUE (assignmentId, studentId)
+);
+
+#学习行为日志表 (Learning_Logs)
+CREATE TABLE Learning_Logs(
+    id VARCHAR(36) PRIMARY KEY,
+    studentId VARCHAR(36) NOT NULL,
+    wordId VARCHAR(36) NOT NULL,
+    isCorrect BOOLEAN NOT NULL,
+    responseTime INT NOT NULL,
+    createdAt DATETIME NOT NULL,
+    FOREIGN KEY (studentId) REFERENCES Users(id),
+    FOREIGN KEY (wordId) REFERENCES Vocabularies(id)
+);
+
+# 学生个人词汇库 (Student_Words)
+CREATE TABLE Student_Words(
+    id VARCHAR(36) PRIMARY KEY,
+    studentId VARCHAR(36) NOT NULL,
+    wordId VARCHAR(36) NOT NULL,
+    masteryLevel INT DEFAULT 0,
+    correctCount INT DEFAULT 0,
+    nextReviewDate DATETIME,
+    FOREIGN KEY (studentId) REFERENCES Users(id),
+    FOREIGN KEY (wordId) REFERENCES Vocabularies(id),
+    UNIQUE (studentId, wordId)
+);
+
+ALTER TABLE Student_Words ADD COLUMN incorrectCount INT DEFAULT 0;
+ALTER TABLE Student_Words ADD COLUMN lastReviewDate DATETIME;
