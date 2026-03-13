@@ -42,7 +42,11 @@ request.interceptors.response.use(
 
       if(res.code === 401){
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        const currentPath = window.location.pathname;
+
+        if (currentPath !== '/') {
+            window.location.href = '/'; 
+        }
       }
 
       return Promise.reject(new Error(res.msg || 'Error'));

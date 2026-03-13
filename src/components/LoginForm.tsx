@@ -39,6 +39,12 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
             const user = res.data;
 
+            if (!user) {
+                message.error(res.msg || "登录异常：未能获取到用户数据！");
+                setIsLoading(false);
+                return;
+            }
+
             if(user.role !== 'teacher'){
                 message.error("权限不足：学生账号禁止登录管理后台！")
                 setIsLoading(false);
