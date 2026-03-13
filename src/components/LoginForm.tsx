@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, BookOpen } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, BookOpen, } from 'lucide-react';
 import { message } from 'antd';
 import { loginUser } from '../api/auth';
 import { useUserStore } from '../store/userStore';
+import type { TeacherInfo} from '../types/index';
 
 interface LoginFormProps {
     onSwitchToRegister: () => void;
 
 }
+
 
 export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
@@ -21,35 +23,35 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true);
 
         const cleanEmail = email.trim();
         const cleanPassword = password.trim();
 
+        if (!cleanEmail || !cleanPassword) {
+            message.warning("账号和密码不能为空哦！");
+            return;
+        }
+
+        setIsLoading(true);
+
         try {
-            const allUsers: any = await loginUser(email, password);
+            const res: { code: number; msg: string; data: TeacherInfo } = await loginUser(cleanEmail, cleanPassword);
 
-            const user = allUsers.find(
-                (u: any) => u.email === cleanEmail && u.password === cleanPassword
-            );
+            const user = res.data;
 
-            if (user) {
-                message.success(`欢迎回来，${user.email}！`);
-                
-                localStorage.setItem('token', `mock_token_${user.id}`);
-                localStorage.setItem('userInfo', JSON.stringify(user));
+            message.success(`欢迎回来${user.fullName}!`)
 
-                if (setCurrentUser) {
-                     setCurrentUser(user);
-                }
-                
-                // 跳转到主页面 (班级概览)
-                navigate('/dashboard');
-            } else {
-                message.error("邮箱或密码错误，请重试！"); 
+            localStorage.setItem('token', 'mock_token_for_now');
+            localStorage.setItem('userInfo', JSON.stringify(user));
+
+            if (setCurrentUser) {
+                setCurrentUser(user);
             }
+
+            navigate('/dashboard');
+
         } catch (error) {
-            message.error("登录服务异常");
+            console.log("登录请求被拦截了", error);
         } finally{
             setIsLoading(false);
         }
@@ -70,7 +72,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                     <label>Email Address</label>
                     <div className="input-wrapper">
                         <Mail className="input-icon left" size={20} />
-                        <input type="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)}/>
+                        <input type="text" placeholder="请输入教师账号" value={email} onChange={(e) => setEmail(e.target.value)}/>
                     </div>
                 </div>
 

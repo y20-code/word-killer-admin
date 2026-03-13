@@ -13,7 +13,7 @@ interface DataAxiosInstance extends AxiosInstance {
 
 // 1. 创建 Axios 实例
 const request = axios.create({
-  baseURL: 'http://localhost:3002',
+  baseURL: 'http://localhost:8081',
   timeout: 10000, // 请求超时时间 (10秒)
 }) as DataAxiosInstance;
 
@@ -35,9 +35,22 @@ request.interceptors.request.use(
 // 3. 响应拦截器 (Response Interceptor)
 request.interceptors.response.use(
   (response: AxiosResponse) => {
-    // 💡 只要 HTTP 状态码是 2xx，就会进入这里
-    // 剥离最外层，返回解包后的 data，并维持泛型 T
-    return response.data as any;
+    const res = response.data;
+
+    if (res.code && res.code !==200){
+      message.error(res.msg || '操作失败')
+
+      if(res.code === 401){
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+
+      return Promise.reject(new Error(res.msg || 'Error'));
+
+    }
+
+
+    return res;
   },
   (error) => {
     // 💡 HTTP 状态码是非 2xx，会进入这里统一处理错误

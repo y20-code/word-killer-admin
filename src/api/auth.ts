@@ -1,12 +1,21 @@
 import request from '../utils/request';
 
-export const registerUser = (userData: any) => {
-    return request.post('/users', userData);
+export interface RegisterData {
+    loginAccount: string;
+    password: string;
+    role: string;
+}
+
+export const registerUser = (userData: RegisterData) => {
+    return request.post('/api/v1/users/register', userData);
 };
 
-export const loginUser = (email: string, password: string) => {
+export const loginUser = (loginAccount: string, password: string) => {
     // 这会在 db.json 里寻找匹配 email 和 password 的记录
-    return request.get('/users');
+    return request.post('/api/v1/users/login',{
+        loginAccount,
+        password
+    });
 };
 
 export const checkEmailExists = (email: string) => {
