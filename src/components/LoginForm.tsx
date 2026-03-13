@@ -39,7 +39,13 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
             const user = res.data;
 
-            message.success(`欢迎回来${user.fullName}!`)
+            if(user.role !== 'teacher'){
+                message.error("权限不足：学生账号禁止登录管理后台！")
+                setIsLoading(false);
+                return;
+            }
+
+            message.success(`欢迎回来${user.fullName} 老师！!`)
 
             localStorage.setItem('token', 'mock_token_for_now');
             localStorage.setItem('userInfo', JSON.stringify(user));

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { UserPlus, Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle } from 'lucide-react';
 import { message } from 'antd';
-import { registerUser, checkEmailExists } from '../api/auth';
+import { registerUser,} from '../api/auth';
 
 interface RegisterFormProps {
     onSwitchToLogin: () => void;
@@ -17,31 +17,25 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (password !== confirmPassword) return message.error("两次输入的密码不一致！");
+        const cleanEmail = email.trim();
+        const cleanPassword = password.trim();
+        const cleanConfirmPassword = confirmPassword.trim();
 
-        if (!email) return message.error("请填写邮箱！");
+        if (cleanPassword !== cleanConfirmPassword) return message.error("两次输入的密码不一致！");
+
+        if (!cleanEmail || !password ) return message.error("账号和密码都必须填写哦！");
 
         setIsLoading(true);
+        
 
         try {
-            // 1. 先查询邮箱是否已经被注册
-            const existingUsers: any = await checkEmailExists(email);
-            if (existingUsers.length > 0) {
-                message.warning("该邮箱已被注册，请直接登录！");
-                setIsLoading(false);
-                return;
-            }
-
-            // 2. 组装要发送给后端的数据 (json-server 会自动生成 id)
-            const newUser = {
-                email,
-                password, // 注意：实际开发中密码必须加密(MD5/SHA)，但在 json-server 模拟阶段存明文即可
-                role: 'teacher', 
-                createdAt: new Date().toISOString()
-            };
 
             // 3. 发送 POST 请求写入 db.json
-            await registerUser(newUser);
+            await registerUser({
+                loginAccount: cleanEmail, 
+                password: cleanPassword,
+                role: 'teacher' // 咱们刚刚定好的，后台注册的都是老师
+            });
 
             message.success("🎉 注册成功！请使用新账号登录。");
             
@@ -52,8 +46,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             onSwitchToLogin();
 
         } catch (error) {
-            console.error(error);
-            message.error("注册失败，请检查网络设置。");
+            console.log("注册请求被拦截", error);
         } finally {
             setIsLoading(false); // 关闭加载状态
         }
@@ -80,7 +73,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                     <label>Email Address</label>
                     <div className="input-wrapper">
                         <Mail className="input-icon left" size={20} />
-                        <input type="email" placeholder="name@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                        <input type="text" placeholder="请输入注册账号" value={email} onChange={e => setEmail(e.target.value)} required />
                         
                     </div>
                 </div>
