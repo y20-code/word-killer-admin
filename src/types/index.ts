@@ -5,6 +5,7 @@ export interface BaseUser {
     role:string;                //身份
     createdAt: string;         // 注册时间
     customAvatar: string;      // 自定义头像
+    token:string;
 }
 
 export interface TeacherInfo extends BaseUser {

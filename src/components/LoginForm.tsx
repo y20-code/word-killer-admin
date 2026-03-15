@@ -53,7 +53,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
             message.success(`欢迎回来${user.fullName} 老师！!`)
 
-            localStorage.setItem('token', 'mock_token_for_now');
+            localStorage.setItem('token', user.token);
             localStorage.setItem('userInfo', JSON.stringify(user));
 
             if (setCurrentUser) {

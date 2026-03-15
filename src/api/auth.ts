@@ -11,7 +11,6 @@ export const registerUser = (userData: RegisterData) => {
 };
 
 export const loginUser = (loginAccount: string, password: string) => {
-    // 这会在 db.json 里寻找匹配 email 和 password 的记录
     return request.post('/api/v1/users/login',{
         loginAccount,
         password
