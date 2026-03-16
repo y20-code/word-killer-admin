@@ -11,6 +11,12 @@ interface DataAxiosInstance extends AxiosInstance {
   delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
 }
 
+export interface BaseRes<T>{
+    code:number;
+    msg:string;
+    data:T
+}
+
 // 1. 创建 Axios 实例
 const request = axios.create({
   baseURL: 'http://localhost:8081',

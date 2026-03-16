@@ -1,4 +1,5 @@
-import request from '../utils/request';
+import request,{type BaseRes} from '../utils/request';
+import type { TeacherInfo} from '../types/index';
 
 export interface RegisterData {
     loginAccount: string;
@@ -11,7 +12,7 @@ export const registerUser = (userData: RegisterData) => {
 };
 
 export const loginUser = (loginAccount: string, password: string) => {
-    return request.post('/api/v1/users/login',{
+    return request.post<BaseRes<TeacherInfo>>('/api/v1/users/login',{
         loginAccount,
         password
     });

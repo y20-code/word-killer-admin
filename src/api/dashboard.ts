@@ -1,17 +1,45 @@
-import request from '../utils/request';
+import { data } from 'react-router-dom';
+import request,{type BaseRes} from '../utils/request';
+import axios from 'axios';
+
+export interface DashboardStatsData {
+    activeClassCount: number;
+    pendingAssignmentCount: number;
+    avgCorrectRate: number;
+}
 
 export const fetchDashboardData = async (teacherId: string) => {
+
+
+  let topStats = {activeClassCount:0,pendingAssignmentCount:0,avgCorrectRate:0};
+
+  try{
+    const res = await request.get<BaseRes<DashboardStatsData>>("/api/v1/dashboard/stats");
+
+    if(res.code === 200){
+      topStats = res.data;
+    }
+  }catch(error){
+    console.error("呼叫真实后端失败，请检查 Spring Boot 是否启动", error)
+  }
+
   // 1. 获取老师管理的班级
-  const classes = await request.get(`/classes?teacherId=${teacherId}`) as any[];
+  const classesRes = await axios.get(`http://localhost:3002/classes?teacherId=${teacherId}`);
+  const classes = classesRes.data as any[];; // 原生 axios 需要手动 .data 剥壳
   const classIds = classes.map(c => c.id);
 
   // 2. 并发拉取所有的底层数据
-  const [allStudents, allAssignments, allRecords, allWords] = await Promise.all([
-    request.get(`/users?role=student`) as Promise<any[]>,
-    request.get(`/assignments`) as Promise<any[]>,
-    request.get(`/student_task_records`) as Promise<any[]>,
-    request.get(`/student_words`) as Promise<any[]>
+  const [allStudentsRes, allAssignmentsRes, allRecordsRes, allWordsRes] = await Promise.all([
+    axios.get(`http://localhost:3002/users?role=student`),
+    axios.get(`http://localhost:3002/assignments`),
+    axios.get(`http://localhost:3002/student_task_records`),
+    axios.get(`http://localhost:3002/student_words`)
   ]);
+
+  const allStudents = allStudentsRes.data as any[];;
+  const allAssignments = allAssignmentsRes.data as any[];;
+  const allRecords = allRecordsRes.data as any[];;
+  const allWords = allWordsRes.data as any[];;
 
   // 3. 过滤出属于当前老师的数据
   const myStudents = allStudents.filter(u => classIds.includes(u.classId));
@@ -20,17 +48,7 @@ export const fetchDashboardData = async (teacherId: string) => {
   const myRecords = allRecords.filter(r => studentIds.includes(String(r.studentId)));
   const myWords = allWords.filter(w => studentIds.includes(String(w.studentId)));
 
-  // --- 🌟 计算顶部 3 个数据卡片 ---
-  const activeClassCount = classes.length;
-  const pendingAssignmentCount = myAssignments.length;
 
-  let totalCorrect = 0;
-  let totalAnswers = 0;
-  myWords.forEach(w => {
-    totalCorrect += w.correctCount || 0;
-    totalAnswers += (w.correctCount || 0) + (w.wrongCount || 0);
-  });
-  const avgCorrectRate = totalAnswers > 0 ? Math.round((totalCorrect / totalAnswers) * 100) : 0;
 
   // --- 🌟 计算今日安排 (取最近布置的 3 个作业) ---
   const recentAssignments = [...myAssignments]
@@ -127,9 +145,9 @@ export const fetchDashboardData = async (teacherId: string) => {
   });
 
   return {
-    activeClassCount,
-    pendingAssignmentCount,
-    avgCorrectRate,
+    activeClassCount: topStats.activeClassCount,
+    pendingAssignmentCount:topStats.pendingAssignmentCount,
+    avgCorrectRate:topStats.avgCorrectRate,
     chartData, 
     recentAssignments, 
     hardWords // 👈 传出最新出炉的易错词榜单！

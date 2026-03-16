@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, Row, Col, Typography, Avatar, Button, List, Tag, Spin, message, Empty, Modal, Result, Progress } from 'antd';
 import { 
   TeamOutlined, BookOutlined, BarChartOutlined, 
-  AlertOutlined, PlusOutlined
+  AlertOutlined, 
 } from '@ant-design/icons';
 import { useUserStore } from '../store/userStore';
 import { useNavigate } from 'react-router-dom';
@@ -26,8 +26,10 @@ export default function Dashboard() {
         pendingAssignmentCount: 0,
         avgCorrectRate: 0,
         chartData: [] as any[],
-        hardWords: [] as any[] // 👈 接住后端传来的易错词数据
+        hardWords: [] as any[],
+        recentAssignments: [] as any[]
     });
+
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalData, setModalData] = useState({ className: '', slackers: [] as any[] });

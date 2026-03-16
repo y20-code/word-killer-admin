@@ -4,7 +4,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, BookOpen, } from 'lucide-react';
 import { message } from 'antd';
 import { loginUser } from '../api/auth';
 import { useUserStore } from '../store/userStore';
-import type { TeacherInfo} from '../types/index';
+
 
 interface LoginFormProps {
     onSwitchToRegister: () => void;
@@ -35,7 +35,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         setIsLoading(true);
 
         try {
-            const res: { code: number; msg: string; data: TeacherInfo } = await loginUser(cleanEmail, cleanPassword);
+            const res = await loginUser(cleanEmail, cleanPassword);
 
             const user = res.data;
 
