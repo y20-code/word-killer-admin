@@ -8,6 +8,18 @@ export interface DashboardStatsData {
     avgCorrectRate: number;
 }
 
+export interface ClassProgressData {
+  name: string;
+    value: number;
+    hasAssignment: boolean;
+    statDate: string;
+    slackers: {
+        id: string;
+        name: string;
+        progress: number;
+    }[];
+}
+
 export const fetchDashboardData = async (teacherId: string) => {
 
 
@@ -21,6 +33,18 @@ export const fetchDashboardData = async (teacherId: string) => {
     }
   }catch(error){
     console.error("呼叫真实后端失败，请检查 Spring Boot 是否启动", error)
+  }
+
+
+  let chartData: ClassProgressData[] = [];
+
+  try{
+    const res = await request.get<BaseRes<ClassProgressData[]>>("/api/v1/dashboard/class-progress");
+    if(res.code ===200) {
+      chartData = res.data;
+    }
+  }catch(error){
+    console.error("班级进度大盘数据拉取失败", error)
   }
 
   // 1. 获取老师管理的班级
@@ -88,61 +112,6 @@ export const fetchDashboardData = async (teacherId: string) => {
   .slice(0, 5);
   // ====================================================================================
 
-  // --- 🌟 计算昨日未通关名单及完成率 (给中间的进度条列表用) ---
-  // 取统计日期：平日看昨天，周一回看上周五
-  const statDate = new Date();
-  const todayWeekday = statDate.getDay(); // 0-6, 周日=0
-  const delta = todayWeekday === 1 ? 3 : 1; // 周一 -> 看周五
-  statDate.setDate(statDate.getDate() - delta);
-  const statDateStr = statDate.toDateString();
-
-  const yesterdayAssignments = myAssignments.filter(a => 
-    new Date(a.createdAt).toDateString() === statDateStr
-  );
-
-  const chartData = classes.map(cls => {
-    const clsAssignments = yesterdayAssignments.filter(a => a.classId === cls.id);
-    const clsStudents = myStudents.filter(s => s.classId === cls.id);
-    
-    const slackers: any[] = [];
-    const hasAssignment = clsAssignments.length > 0;
-
-    if (hasAssignment) {
-      clsStudents.forEach(stu => {
-        let currentProgress = 100;
-        let finishedAll = true;
-
-        const studentAssignments = clsAssignments.filter(a => a.targetGrade === stu.grade);
-        if (studentAssignments.length > 0) {
-          studentAssignments.forEach(assign => {
-            const record = myRecords.find(r => String(r.assignmentId) === String(assign.id) && String(r.studentId) === String(stu.id));
-            if (!record || Number(record.progress) < 100) {
-              finishedAll = false;
-              currentProgress = record ? Number(record.progress) : 0;
-            }
-          });
-
-          if (!finishedAll) {
-            slackers.push({ id: stu.id, name: stu.fullName, progress: currentProgress });
-          }
-        }
-      });
-    }
-
-    const totalStudents = clsStudents.length;
-    let completionRate = 0;
-    if (hasAssignment && totalStudents > 0) {
-      completionRate = Math.round(((totalStudents - slackers.length) / totalStudents) * 100);
-    }
-
-    return { 
-      name: cls.name, 
-      value: completionRate, 
-      slackers: slackers,
-      hasAssignment,
-      statDate: statDateStr
-    };
-  });
 
   return {
     activeClassCount: topStats.activeClassCount,
