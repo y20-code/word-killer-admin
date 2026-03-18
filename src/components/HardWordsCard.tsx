@@ -1,11 +1,11 @@
-
 import {Col,Card,List,Empty,Button,Avatar,Typography} from 'antd'
 import { AlertOutlined } from '@ant-design/icons'
+import type { HardWordData } from '../api/dashboard';
 
 const {Text} = Typography;
 
 interface HardWordsProps{
-    data:any[]
+    data:HardWordData[]
 }
 
 export default function HardWordsCard({data}:HardWordsProps){
@@ -20,7 +20,7 @@ export default function HardWordsCard({data}:HardWordsProps){
                 className="alert-list"
                 dataSource={data}
                 locale={{ emptyText: <Empty description="太棒了！昨天大家都没有背错单词！" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
-                renderItem={(item: any, index: number) => (
+                renderItem={(item: HardWordData, index: number) => (
                 <List.Item actions={[<Button type="dashed" size="small">一键加入复习任务</Button>]}>
                     <List.Item.Meta 
                     avatar={

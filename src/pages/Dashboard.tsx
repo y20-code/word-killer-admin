@@ -27,7 +27,6 @@ export default function Dashboard() {
         avgCorrectRate: 0,
         chartData: [] as any[],
         hardWords: [] as any[],
-        recentAssignments: [] as any[]
     });
 
 
