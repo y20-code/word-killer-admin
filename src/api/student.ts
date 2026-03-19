@@ -1,75 +1,52 @@
-import request from '../utils/request';
+import request,{type BaseRes} from '../utils/request';
 
-import type { ClassInfo,StudentInfo,TaskInfo,WordRecord } from '../types';
+export interface SimpleClassData {
+  id: string;
+  name: string;
+}
+
+export interface StudentData {
+  key: string;
+  name: string;
+  avatar: string;
+  joinDate: string;
+  classId: string;
+  words: number;
+  stars: number;
+  lastActive: string;
+}
+
+export interface StudentListResData {
+  totalStudents: number;
+  avgProgress: number;
+  classes: SimpleClassData[];
+  students: StudentData[];
+}
 
 export const fetchTeacherStudents = async (teacherId: string) => {
-  const classes = await request.get(`/classes?teacherId=${teacherId}`) as ClassInfo[];
-  const classIds = classes.map(c => c.id);
 
-  const allUsers = await request.get(`/users?role=student`) as StudentInfo[];
-  const myStudents = allUsers.filter(u => classIds.includes(u.classId));
+  const res = await request.get<BaseRes<StudentListResData>>('/api/v1/students');
 
-  const taskRecords = await request.get(`/student_task_records`) as TaskInfo[];
-  const studentWords = await request.get(`/student_words`) as WordRecord[]; 
+  if (res.code === 200){
+    const data = res.data;
 
-  let totalProgressSum = 0;
-  let validProgressCount = 0;
-
-  // 小工具：提取合法时间戳，避免出现缺字段时直接显示“今天”
-  const pushIfValidDate = (collector: number[], value?: string) => {
-    if (!value) return;
-    const ts = new Date(value).getTime();
-    if (!Number.isNaN(ts)) collector.push(ts);
-  };
-
-  const studentData = myStudents.map(student => {
-    const myRecords = taskRecords.filter(record => String(record.studentId) === String(student.id));
-    const activityTimestamps: number[] = [];
-
-    // 1) 任务记录里的时间（优先）
-    myRecords.forEach(record => {
-      pushIfValidDate(activityTimestamps, record.updatedAt);
-      pushIfValidDate(activityTimestamps, record.completedAt);
-      // 兼容没有 updated/completed 字段但后端可能未来加的 createdAt
-      // @ts-ignore
-      pushIfValidDate(activityTimestamps, record.createdAt);
-
-      totalProgressSum += Number(record.progress) || 0;
-      validProgressCount++;
-    });
-
-    const myWordsInDB = studentWords.filter(sw => String(sw.studentId) === String(student.id));
-    
-    // 2) 词汇练习的最后测试时间也算“活跃”
-    myWordsInDB.forEach(sw => pushIfValidDate(activityTimestamps, sw.lastTestedAt));
-
-    // 🛡️ 绝杀防御 1：用 Set 提取独一无二的 wordId，彻底挤干水分！
-    const uniqueWordIds = new Set(myWordsInDB.map(sw => String(sw.wordId)));
-    const realTotalWords = uniqueWordIds.size; // 这才是真实的掌握词汇量！
-
-    // 3) 格式化最近活跃时间（无记录时返回“暂无活动”，不再默认“今天”）
-    const lastActiveDate = activityTimestamps.length > 0
-      ? new Date(Math.max(...activityTimestamps)).toISOString().split('T')[0]
-      : '暂无活动';
+    const processedStudents = data.students.map(student => ({
+      ...student,
+      // 如果后端没有头像，极其聪明地给一个随机默认头像
+      avatar: student.avatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${student.key}`,
+      // 如果没有加入时间，给个默认日期
+      joinDate: student.joinDate || '2026-03-01' 
+    }));
 
     return {
-      key: student.id,
-      name: student.fullName || '未命名学生',
-      avatar: student.customAvatar || `https://api.dicebear.com/7.x/notionists/svg?seed=${student.id}`, 
-      joinDate: student.createdAt ? student.createdAt.split('T')[0] : '2026-03-01', 
-      words: realTotalWords, 
-      stars: realTotalWords > 20 ? 5 : (realTotalWords > 5 ? 4 : 3), 
-      lastActive: lastActiveDate, 
+      students: processedStudents,
+      totalStudents: data.totalStudents,
+      avgProgress: data.avgProgress,
+      classes: data.classes
     };
-  });
-
-  const avgProgress = validProgressCount > 0 ? Math.round(totalProgressSum / validProgressCount) : 0;
-
-  return {
-    students: studentData,
-    totalStudents: studentData.length,
-    avgProgress: avgProgress, 
-  };
+  }else {
+    throw new Error(res.msg || "获取学生大名单失败");
+  }
 };
 
 export const fetchStudentDetail = async (studentId: string) => {
