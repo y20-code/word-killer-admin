@@ -25,122 +25,41 @@ type StudentWord = {
 
 export default function Assignment() {
   const [form] = Form.useForm();
-  const currentUser = useUserStore((state) => state.currentUser);
 
   const [classes, setClasses] = useState<any[]>([]);
   const [wordbooks, setWordbooks] = useState<any[]>([]);
-  const [availableWordbooks, setAvailableWordbooks] = useState<any[]>([]); 
-
   const [vocabularies, setVocabularies] = useState<TransferItem[]>([]); 
   const [targetKeys, setTargetKeys] = useState<string[]>([]); 
   const [selectedGrade, setSelectedGrade] = useState<string>('');
-  
-  const [learnedWordIds, setLearnedWordIds] = useState<number[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFetchingWords, setIsFetchingWords] = useState(false);
 
   useEffect(() => {
-    if (!currentUser?.id) return;
-    const initData = async () => {
-      try {
-        const [classesData, booksData] = await Promise.all([
-          fetchClasses(currentUser.id),
-          fetchWordbooks()
-        ]);
-        setClasses(classesData);
-        setWordbooks(booksData);
-        setAvailableWordbooks(booksData); 
-      } catch (error) {
-        message.error('基础数据加载失败');
-      }
-    };
-    initData();
-  }, [currentUser]);
+      const initData = async () => {
+        try {
+          const [classesData, booksData] = await Promise.all([
+            fetchClasses(), // 呼叫极其轻量的真实班级接口
+            fetchWordbooks() // 呼叫词书字典
+          ]);
+          setClasses(classesData);
+          setWordbooks(booksData);
+        } catch (error) {
+          message.error('基础数据加载失败');
+        }
+      };
+      initData();
+    }, []);
 
   // 根据已布置的作业过滤掉“发过的单词”，并尝试自动匹配词书
-  const handleClassesChange = async (selectedClassIds: string[]) => {
+  const handleClassesChange = (selectedClassIds: string[]) => {
     form.setFieldsValue({ wordbookId: undefined });
     setVocabularies([]);
     setTargetKeys([]);
     setSelectedGrade('');
-    setLearnedWordIds([]);
-
-    if (!selectedClassIds || selectedClassIds.length === 0) {
-      setAvailableWordbooks(wordbooks);
-      return;
-    }
-
-    setIsFetchingWords(true);
-    try {
-      const allAssignments = await request.get<any[]>('/assignments');
-      
-      const usedIds = new Set<number>();
-      allAssignments.forEach((a: any) => {
-        if (selectedClassIds.includes(a.classId) && a.wordIds) {
-          a.wordIds.forEach((id: number) => usedIds.add(id));
-        }
-      });
-      const usedIdArray = Array.from(usedIds);
-      setLearnedWordIds(usedIdArray); // ⚠️ state 异步，下面直接用局部变量
-
-      const allDetectedGrades = new Set<string>(); 
-      for (const classId of selectedClassIds) {
-        const targetClass = classes.find(c => c.id === classId);
-        const className = targetClass?.name || ''; 
-
-        const possibleGrades = ['初一', '初二', '初三', '高一', '高二', '高三', '七年级', '八年级', '九年级', '四级', '六级', '考研'];
-        let detectedGrade = possibleGrades.find(g => className.includes(g));
-
-        if (!detectedGrade) {
-          const students = await request.get<any[]>(`/users?role=student&classId=${classId}`);
-          const studentGrades = Array.from(new Set(students.map((s: any) => s.grade).filter(Boolean))) as string[];
-          if (studentGrades.length === 1) detectedGrade = studentGrades[0];
-        }
-
-        if (detectedGrade) {
-          const searchKeywords = [detectedGrade];
-          if (detectedGrade === '初一') searchKeywords.push('七年级');
-          if (detectedGrade === '初二') searchKeywords.push('八年级');
-          if (detectedGrade === '初三') searchKeywords.push('九年级');
-          searchKeywords.forEach(k => allDetectedGrades.add(k));
-        }
-      }
-
-      const uniqueGrades = Array.from(allDetectedGrades);
-
-      if (uniqueGrades.length === 0) {
-        setAvailableWordbooks(wordbooks); 
-        return;
-      }
-
-      const matchedBooks = wordbooks.filter(b => 
-        uniqueGrades.some(keyword => b.name.includes(keyword))
-      );
-      setAvailableWordbooks(matchedBooks);
-
-      if (matchedBooks.length === 1) {
-        const autoBook = matchedBooks[0];
-        form.setFieldsValue({ wordbookId: autoBook.id }); 
-        
-        if (usedIds.size > 0) {
-          message.success(`已加载【${autoBook.name}】词库，并智能排除了 ${usedIds.size} 个已学单词！`);
-        } else {
-          message.success(`已为选中的班级自动加载【${autoBook.name}】专属词库！`);
-        }
-        // 传入刚算好的 usedIdArray，避免因 setState 异步导致旧值渲染
-        handleWordbookChange(autoBook.id, usedIdArray); 
-      }
-    } catch (error) {
-      console.error(error);
-      message.error('班级数据分析失败');
-    } finally {
-      setIsFetchingWords(false);
-    }
   };
 
-  const handleWordbookChange = async (bookId: string, overrideLearned?: number[]) => {
-    const learnedPool = overrideLearned ?? learnedWordIds;
+  const handleWordbookChange = async (bookId: string) => {
     setIsFetchingWords(true);
     try {
       const currentBook = wordbooks.find(b => b.id === bookId);
@@ -150,22 +69,15 @@ export default function Assignment() {
 
       const words = await fetchVocabularies(bookId);
       
-      const freshWords = words.filter((w: any) => !learnedPool.includes(w.id));
-
-      const transferData = await Promise.all(freshWords.map(async (v: any) => {
-        return {
-          key: String(v.id), 
-          title: v.word,
-          description: `${v.partOfSpeech || ''} ${v.translation}`
-        };
+      // 极其干净的格式转换，没有任何恶心的 filter 逻辑
+      const transferData = words.map((v: any) => ({
+        key: String(v.id), 
+        title: v.word,
+        description: `${v.partOfSpeech || ''} ${v.translation}`
       }));
 
       setVocabularies(transferData);
       setTargetKeys([]); 
-      
-      if (freshWords.length === 0 && words.length > 0) {
-        message.warning('太强了！该班级已经把这本词书的所有单词都学完了！🎉');
-      }
     } catch (error) {
       message.error('拉取词库失败');
     } finally {
@@ -176,7 +88,7 @@ export default function Assignment() {
   // ==================== 🌟 完全傻瓜式的极速点按引擎 ====================
   const quickSelect = (count: number, isRandom: boolean = false) => {
     if (vocabularies.length === 0) {
-      return message.warning('当前词库已被学完或未选择！');
+      return message.warning('当前词库为空或未选择！');
     }
 
     const actualCount = Math.min(count, vocabularies.length); 
@@ -203,28 +115,6 @@ export default function Assignment() {
     return today.add(1, 'day').endOf('day');
   };
 
-  // 基于简单记忆算法的“到期复习”判定：越熟练间隔越长
-  const needsReview = (record: StudentWord) => {
-    const correct = Number(record.correctCount || 0);
-    const wrong = Number(record.wrongCount || 0);
-    const total = correct + wrong;
-    const correctRate = total > 0 ? correct / total : 0;
-
-    // 估算熟练度等级（0-6），支持后端传入 masteryLevel
-    const derivedLevel = Math.round(correctRate * 5);
-    const level = Math.max(0, Math.min(6, Number(record.masteryLevel ?? derivedLevel)));
-
-    // 间隔表：新词当天，随后 1/2/4/7/14/30 天
-    const intervals = [0, 1, 2, 4, 7, 14, 30];
-    const lastTested = record.lastTestedAt ? dayjs(record.lastTestedAt) : null;
-    const nextDue = lastTested
-      ? lastTested.add(intervals[level], 'day').endOf('day')
-      : dayjs(0); // 从未测过 -> 立即复习
-
-    // 低正确率或完全未测，直接视为到期
-    if (total === 0 || correctRate < 0.7) return true;
-    return dayjs().isAfter(nextDue);
-  };
 
   const handleFinish = async (values: any) => {
     if (targetKeys.length === 0) {
@@ -235,61 +125,30 @@ export default function Assignment() {
     try {
       const finalDeadline = values.deadline ? dayjs(values.deadline) : calculateDefaultDeadline();
       const dateStr = dayjs().format('MM月DD日');
-      const baseNewWords = targetKeys.map(Number);
+      const autoTitle = `${dateStr} 词汇任务`; // 简化了标题，极其清爽
 
-      // 预拉取学生与练习数据，避免循环内多次请求
-      const needAdaptive = Boolean(values.enablePersonalization);
-      const allStudentWords = needAdaptive ? await request.get<StudentWord[]>('/student_words') : [];
+      // 🗡️ 极其霸道的组装！不需要任何前端循环发送和计算错题了！
+      const payload = {
+        classIds: values.classIds,
+        title: autoTitle,
+        targetGrade: selectedGrade,
+        deadline: finalDeadline.toISOString(),
+        baseWordIds: targetKeys, // 老师选的这些词
+        isPersonalized: values.enablePersonalization // 千人千面开关直接扔给后端！
+      };
 
-      const promises = values.classIds.map(async (classId: string) => {
-        const targetClass = classes.find(c => c.id === classId);
-        const className = targetClass ? targetClass.name : '未知班级';
-        const autoTitle = `${className} ${dateStr} 词汇任务`;
+      // 💥 一炮干穿 Spring Boot 真实接口！
+      await createAssignment(payload);
 
-        // 计算本班的“未掌握词”集合
-        let reviewWordIds: number[] = [];
-        if (needAdaptive) {
-          const students = await request.get<any[]>(`/users?role=student&classId=${classId}`);
-          const studentIds = new Set(students.map((s: any) => String(s.id)));
-          const reviewSet = new Set<number>();
-          allStudentWords.forEach((sw: StudentWord) => {
-            if (studentIds.has(String(sw.studentId)) && needsReview(sw)) {
-              reviewSet.add(Number(sw.wordId));
-            }
-          });
-          reviewWordIds = Array.from(reviewSet);
-        }
-
-        // 合并基础新词 + 复习词，去重
-        const mergedWordIds = Array.from(new Set([...baseNewWords, ...reviewWordIds]));
-
-        const payload = {
-          classId: classId,
-          targetGrade: selectedGrade, 
-          title: autoTitle, 
-          wordIds: mergedWordIds, 
-          reviewWordIds, // 方便后端/分析直接拿到复习词来源
-          deadline: finalDeadline.toISOString(), 
-          isPersonalized: values.enablePersonalization, 
-          createdAt: new Date().toISOString()
-        };
-
-        return createAssignment(payload); 
-      });
-
-      await Promise.all(promises);
-      
-      message.success(`🎉 霸气！已成功向 ${values.classIds.length} 个班级批量派发作业！${values.enablePersonalization ? '(千人千面引擎已启动🤖)' : ''}`);
+      message.success(`🎉 霸气！已成功向 ${values.classIds.length} 个班级批量派发作业！${values.enablePersonalization ? '(千人千面引擎已在后端启动🤖)' : ''}`);
       
       form.resetFields();
       setTargetKeys([]);
       setVocabularies([]);
       setSelectedGrade(''); 
-      setAvailableWordbooks(wordbooks); 
-      setLearnedWordIds([]);
       
-    } catch (error) {
-      message.error('作业批量发布失败，请重试');
+    } catch (error: any) {
+      message.error(error.message || '作业发布失败，请检查网络');
     } finally {
       setIsSubmitting(false);
     }

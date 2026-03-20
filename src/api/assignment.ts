@@ -1,4 +1,4 @@
-import request from '../utils/request';
+import request,{type BaseRes} from '../utils/request';
 
 // 1. 获取老师名下的班级
 export const fetchClasses = async (teacherId: string) => {
@@ -18,5 +18,5 @@ export const fetchVocabularies = async (bookId: string) => {
 // 4. 发射！创建新的作业任务
 export const createAssignment = async (assignmentData: any) => {
   // json-server 接收 POST 请求会自动生成 id
-  return request.post('/assignments', assignmentData);
+  return request.post('/api/v1/assignments', assignmentData);
 };
