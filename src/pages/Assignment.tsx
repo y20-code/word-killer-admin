@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Form, Select, DatePicker, Button, Transfer, message, Row, Col, Typography, Space, Switch, Tooltip } from 'antd';
 import { BookOutlined, SendOutlined, ThunderboltOutlined, RobotOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { useUserStore } from '../store/userStore';
 import { fetchClasses, fetchWordbooks, fetchVocabularies, createAssignment } from '../api/assignment';
-import request from '../utils/request';
 import dayjs from 'dayjs'; 
 
 const { Text } = Typography;
@@ -210,7 +208,7 @@ export default function Assignment() {
                   size="middle" 
                   loading={isFetchingWords}
                 >
-                  {availableWordbooks.map(b => <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>)}
+                  {wordbooks.map(b => <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>)}
                 </Select>
               </Form.Item>
             </div>
