@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, BookOpen, Volume2, PlusCircle, MinusCircle } from 'lucide-react';
 import './DictionaryAdmin.scss';
+import { createVocabulary,fetchAllVocabularies } from '../api/vocabulary';
+import { fetchWordbooks } from '../api/assignment';
+import { message } from 'antd';
 
 interface Vocabulary {
   id: string;
@@ -21,12 +24,13 @@ interface Definition {
 }
 
 export default function DictionaryAdmin() {
+  const [wordbooks, setWordbooks] = useState<any[]>([]);
   const [vocabularies, setVocabularies] = useState<Vocabulary[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const [newWord, setNewWord] = useState('');
   const [newExample, setNewExample] = useState('');
-  const [newGrade, setNewGrade] = useState('');
+  const [selectedBookId, setSelectedBookId] = useState('');
   
   // 🌟 核心突破：把词性和释义组合成“动态数组”，默认给一行空数据
   const [definitions, setDefinitions] = useState<Definition[]>([{ pos: 'n.', meaning: '' }]);
@@ -40,11 +44,15 @@ export default function DictionaryAdmin() {
 
   const fetchWords = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/vocabularies`);
-      const data: Vocabulary[] = await res.json();
-      setVocabularies(data);
+      // 🌟 大厂并发杀招：同时拉取词书下拉框数据 和 底部表格单词数据
+      const [booksData, wordsData] = await Promise.all([
+        fetchWordbooks(),
+        fetchAllVocabularies()
+      ]);
+      setWordbooks(booksData);      // 装填下拉框
+      setVocabularies(wordsData);   // 装填表格
     } catch (error) {
-      console.error("获取词库失败:", error);
+      message.error("获取基础数据失败，请检查网络");
     }
   };
 
@@ -68,64 +76,39 @@ export default function DictionaryAdmin() {
   const handleAddWord = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); 
     
-    if (!newWord || !newGrade) return alert("单词和适用阶段不能为空！");
-    
-    // 校验：所有释义行都必须填了中文
+  
+    if (!newWord || !selectedBookId) return message.warning("单词和目标词书不能为空！");
     const hasEmptyMeaning = definitions.some(d => d.meaning.trim() === '');
-    if (hasEmptyMeaning) return alert("请确保每一行的中文释义都已填写！");
+    if (hasEmptyMeaning) return message.warning("请确保每一行的中文释义都已填写！");
 
     setLoading(true);
 
     try {
-      const booksRes = await fetch(`${API_BASE_URL}/wordbooks`);
-      const books = await booksRes.json();
-      let targetBook = books.find((b: any) => b.name === newGrade.trim());
-
-      if (!targetBook) {
-        const newBookPayload = {
-          name: newGrade.trim(),
-          coverImage: "https://api.dicebear.com/7.x/shapes/svg?seed=" + newGrade.trim(),
-          unitCount: 1,
-          description: `系统自动聚合的 ${newGrade.trim()} 专属词库`
-        };
-        const createBookRes = await fetch(`${API_BASE_URL}/wordbooks`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newBookPayload)
-        });
-        targetBook = await createBookRes.json(); 
-      }
-
-      // 🌟 神级数据聚合：把动态行数据，压缩成极其规范的字符串！
-      // 提取所有不重复的词性 (例如： "n., v.")
+      // 2. 极其优雅的数据聚合
       const uniquePos = Array.from(new Set(definitions.map(d => d.pos))).join(', ');
-      // 聚合释义 (例如： "n. 水；v. 浇水")
       const combinedTranslation = definitions.map(d => `${d.pos} ${d.meaning.trim()}`).join('；');
 
-      const newEntry: Omit<Vocabulary, 'id'> = {
-        bookId: targetBook.id, 
+      // 3. 极其标准的 Payload
+      const payload = {
+        bookId: selectedBookId, 
         word: newWord.trim(),
-        partOfSpeech: uniquePos,       // 存入: "n., v."
-        translation: combinedTranslation, // 存入: "n. 水；v. 浇水"
-        category: newGrade.trim(),
+        partOfSpeech: uniquePos,
+        translation: combinedTranslation,
         example: newExample.trim(), 
-        phonetic: "", 
-        audioUrl: `https://dict.youdao.com/dictvoice?audio=${newWord.trim()}&type=2` 
       };
 
-      await fetch(`${API_BASE_URL}/vocabularies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry)
-      });
+      // 💥 4. 直接呼叫咱们封装好的 API 引擎！
+      await createVocabulary(payload);
       
-      // 录入成功，重置表单（保留年级，方便连续录入）
+      // 5. 极其丝滑的打扫战场
+      message.success('录入成功！');
       setNewWord('');
       setNewExample(''); 
       setDefinitions([{ pos: 'n.', meaning: '' }]); 
-      fetchWords();
-    } catch (error) {
-      console.error("添加失败:", error);
+      fetchWords(); // 重新拉取最新列表，让刚录的词刷新在表格里
+
+    } catch (error: any) {
+      message.error(error.message || "添加失败");
     } finally {
       setLoading(false);
     }
@@ -163,13 +146,16 @@ export default function DictionaryAdmin() {
             onChange={e => setNewWord(e.target.value)} 
             style={{ flex: 1.5, padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
           />
-          <input 
-            type="text" 
-            placeholder="适用阶段 (如: 初二)" 
-            value={newGrade} 
-            onChange={e => setNewGrade(e.target.value)} 
-            style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-          />
+          <select 
+            value={selectedBookId} 
+            onChange={e => setSelectedBookId(e.target.value)}
+            style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: 'white' }}
+          >
+            <option value="" disabled>请选择要存入的词书</option>
+            {wordbooks.map(book => (
+              <option key={book.id} value={book.id}>{book.name}</option>
+            ))}
+          </select>
         </div>
 
         {/* ==================== 🌟 核心：动态释义矩阵 ==================== */}
