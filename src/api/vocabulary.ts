@@ -20,10 +20,19 @@ export const createVocabulary = async (data: CreateVocabularyPayload) => {
   throw new Error(res.msg || '录入失败');
 };
 
+//获取全部单词
 export const fetchAllVocabularies = async () => {
   const res = await request.get('/api/v1/vocabularies/all') as any;
   if (res.code === 200) {
     return res.data;
   }
   return [];
+};
+
+export const deleteVocabulary = async (id: string) => {
+  const res = await request.delete(`/api/v1/vocabularies/${id}`) as any;
+  if (res.code === 200) {
+    return res;
+  }
+  throw new Error(res.msg || '删除失败');
 };

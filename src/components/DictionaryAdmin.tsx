@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, BookOpen, Volume2, PlusCircle, MinusCircle } from 'lucide-react';
 import './DictionaryAdmin.scss';
-import { createVocabulary,fetchAllVocabularies } from '../api/vocabulary';
-import { fetchWordbooks } from '../api/assignment';
+import { createVocabulary,fetchAllVocabularies,deleteVocabulary } from '../api/vocabulary';
+import { fetchWordbooks,fetchVocabularies } from '../api/assignment';
 import { message } from 'antd';
 
 interface Vocabulary {
@@ -35,26 +35,39 @@ export default function DictionaryAdmin() {
   // 🌟 核心突破：把词性和释义组合成“动态数组”，默认给一行空数据
   const [definitions, setDefinitions] = useState<Definition[]>([{ pos: 'n.', meaning: '' }]);
 
-  const API_BASE_URL = 'http://localhost:3002';
   const posList = ['n.', 'v.', 'adj.', 'adv.', 'prep.', 'conj.', 'phr.'];
 
   useEffect(() => {
-    fetchWords();
+    const initBooks = async () => {
+      try {
+        const booksData = await fetchWordbooks();
+        setWordbooks(booksData);
+      } catch (error) {
+        message.error("获取词书目录失败");
+      }
+    };
+    initBooks();
   }, []);
 
-  const fetchWords = async () => {
+  const loadWords = async (bookId: string) => {
     try {
-      // 🌟 大厂并发杀招：同时拉取词书下拉框数据 和 底部表格单词数据
-      const [booksData, wordsData] = await Promise.all([
-        fetchWordbooks(),
-        fetchAllVocabularies()
-      ]);
-      setWordbooks(booksData);      // 装填下拉框
-      setVocabularies(wordsData);   // 装填表格
+      if (!bookId) {
+        // 没选书（空字符串），直接拉取全局词库！
+        const allWords = await fetchAllVocabularies();
+        setVocabularies(allWords);
+      } else {
+        // 选了具体的书，只拉这本书的词！
+        const bookWords = await fetchVocabularies(bookId);
+        setVocabularies(bookWords);
+      }
     } catch (error) {
-      message.error("获取基础数据失败，请检查网络");
+      message.error("获取单词数据失败");
     }
   };
+
+  useEffect(() => {
+    loadWords(selectedBookId);
+  }, [selectedBookId]);
 
   // 🌟 动态增加/删除/修改释义行的核心逻辑
   const addDefinitionRow = () => {
@@ -105,7 +118,7 @@ export default function DictionaryAdmin() {
       setNewWord('');
       setNewExample(''); 
       setDefinitions([{ pos: 'n.', meaning: '' }]); 
-      fetchWords(); // 重新拉取最新列表，让刚录的词刷新在表格里
+      loadWords(selectedBookId);
 
     } catch (error: any) {
       message.error(error.message || "添加失败");
@@ -115,12 +128,13 @@ export default function DictionaryAdmin() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("确定要彻底删除该词条吗？")) return;
+    if (!window.confirm("确定要从该词书中移除或彻底删除该词条吗？")) return;
     try {
-      await fetch(`${API_BASE_URL}/vocabularies/${id}`, { method: 'DELETE' });
-      fetchWords(); 
-    } catch (error) {
-      console.error("删除失败:", error);
+      await deleteVocabulary(id);
+      message.success("删除成功！");
+      loadWords(selectedBookId);
+    } catch (error: any) {
+      message.error(error.message || "删除失败");
     }
   };
 
@@ -151,7 +165,9 @@ export default function DictionaryAdmin() {
             onChange={e => setSelectedBookId(e.target.value)}
             style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', backgroundColor: 'white' }}
           >
-            <option value="" disabled>请选择要存入的词书</option>
+            {/* 🌟 核心突破：value 为空，代表“看全部” */}
+            <option value="">🌍 全部词书 (展示全局词库)</option>
+            
             {wordbooks.map(book => (
               <option key={book.id} value={book.id}>{book.name}</option>
             ))}

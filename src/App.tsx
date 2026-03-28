@@ -35,7 +35,6 @@ export default function App() {
           <Route path="/assignments" element={<Assignment />} />
           <Route path="/reports" element={<Report />} />
           <Route path="/settings" element={<Settings />} />
-
           <Route path="/dictionary" element={<DictionaryAdmin />} />
           
         </Route>

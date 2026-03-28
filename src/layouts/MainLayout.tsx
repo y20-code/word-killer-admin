@@ -3,7 +3,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Layout, Menu, Typography, Badge, Avatar, Button,Space } from 'antd';
 import { 
   DashboardOutlined, TeamOutlined, BookOutlined, BarChartOutlined, 
-  SettingOutlined, BellOutlined, PlusOutlined 
+  SettingOutlined, BellOutlined, PlusOutlined,EditOutlined
 } from '@ant-design/icons';
 import '../pages/Dashboard.scss'; 
 import { useUserStore } from '../store/userStore';
@@ -30,6 +30,7 @@ export default function MainLayout() {
       { key: '/assignments', icon: <BookOutlined />, label: '作业布置' },
       { key: '/reports', icon: <BarChartOutlined />, label: '数据报告' },
       { key: '/settings', icon: <SettingOutlined />, label: '设置' },
+      { key: '/dictionary', icon: <EditOutlined />, label: '录入单词' },
     ];
 
   const displayName = currentUser?.fullName || currentUser?.email?.split('@')[0] || '加载中...';
