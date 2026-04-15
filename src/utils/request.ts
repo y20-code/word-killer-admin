@@ -17,9 +17,11 @@ export interface BaseRes<T>{
     data:T
 }
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
 // 1. 创建 Axios 实例
 const request = axios.create({
-  baseURL: 'http://localhost:8081',
+  baseURL: apiBaseUrl,
   timeout: 10000, // 请求超时时间 (10秒)
 }) as DataAxiosInstance;
 

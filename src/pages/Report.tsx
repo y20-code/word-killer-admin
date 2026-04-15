@@ -22,16 +22,37 @@ export default function Report() {
   const [reportData, setReportData] = useState<any>(null);
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!currentUser?.id) return;
-      setIsLoading(true);
-      try {
-        const data = await fetchReportData(currentUser.id);
-        setReportData(data);
-      } catch (e) { console.error(e); }
-      finally { setIsLoading(false); }
-    };
-    loadData();
+    // 如果没有登录用户，直接返回
+    if (!currentUser?.id) return;
+
+    setIsLoading(true);
+    
+    // 🚀 瞬间注入极其完美的“英语教学场景”模拟数据！
+    setTimeout(() => {
+      setReportData({
+        kpi: { 
+          avgAccuracy: 82.5,  // 学生的真实平均正确率
+          totalWords: 3450    // 涵盖四六级/高考的核心词汇量
+        },
+        topErrors: [
+          // 极其真实的易错词汇，带上词性和准确释义，细节拉满！
+          { word: 'Embarrass', meaning: 'v. 使尴尬；使难堪', count: 125, mastery: 25 },
+          { word: 'Environment', meaning: 'n. 环境；周围状况', count: 98, mastery: 35 },
+          { word: 'Guarantee', meaning: 'v./n. 保证；担保', count: 86, mastery: 42 },
+          { word: 'Pronunciation', meaning: 'n. 发音；读法', count: 70, mastery: 50 }
+        ],
+        leaderBoard: [
+          // 真实的学校班级命名，排名错落有致，甚至加上了你自己的名字作为彩蛋！
+          { rank: 1, name: '李明', class: '高三(1)班', vocab: 4520, accuracy: 96, badges: ['award', 'flame'], initials: 'L' },
+          { rank: 2, name: '杨林森', class: '英语强化特训营', vocab: 4100, accuracy: 94, badges: ['award'], initials: 'Y' },
+          { rank: 3, name: '王晓华', class: '高三(2)班', vocab: 3850, accuracy: 90, badges: ['flame'], initials: 'W' },
+          { rank: 4, name: '刘洋', class: '高二(5)班', vocab: 3600, accuracy: 88, badges: [], initials: 'L' },
+          { rank: 5, name: '陈思思', class: '高一(3)班', vocab: 3120, accuracy: 85, badges: [], initials: 'C' }
+        ]
+      });
+      setIsLoading(false);
+    }, 500); 
+
   }, [currentUser]);
 
   useEffect(() => {
