@@ -30,7 +30,7 @@ jobs:
         context: .
         push: true
         # 给你的集装箱贴上标签：你的账号名/项目名:latest
-        tags: ${{ secrets.DOCKER_USERNAME }}/word-killer-admin:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/word:latest
 
     # [物理步骤 4] 远程操控你的阿里云：登录、清理旧箱子、拉取新箱子、点火运行！
     - name: 🚀 Deploy to Aliyun Server
