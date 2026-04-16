@@ -13,6 +13,27 @@ jobs:
     - name: 📦 Checkout Code
       uses: actions/checkout@v3
 
+    - name: 🟢 搭建安检环境 (Setup Node.js)
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+      
+    - name: 📥 下载工程依赖 (npm install)
+      run: npm install
+
+    - name: 🛡️ 语法级安检 (ESLint)
+      run: npm run lint
+    
+    - name: 🧪 逻辑级安检 (Unit Test)
+      run: npm run test
+
+    - name: 🏗️ Build Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: false 
+        tags: word:latest
+
     # 第 1 步：正常打包构建你的 word 镜像
     - name: 🏗️ Build Docker Image
       uses: docker/build-push-action@v4
