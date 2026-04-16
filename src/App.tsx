@@ -31,17 +31,44 @@ export default function App() {
 
   // 🚨 终极拦截逻辑
   if (isMobile) {
-    return (
-      <div style={{ padding: '40px 20px', textAlign: 'center', height: '100vh', backgroundColor: '#f6f8fa', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <h2 style={{ color: '#333', marginBottom: '16px' }}>📱 移动端适配中...</h2>
-        <p style={{ color: '#666', lineHeight: '1.6' }}>
-          尊敬的面试官您好：<br/><br/>
-          “Word Killer Admin” 包含复杂的数据分析大盘与高交互长列表，为保证完美的 O(1) 渲染体验，<strong style={{color:'#d93025'}}>请您使用 PC 端浏览器访问本站。</strong><br/><br/>
-          感谢您的查阅！
-        </p>
+  // 定义你的核心技术栈数据
+  const techStack = [
+    { category: '前端内核', tags: ['React 18', 'TypeScript', 'Vite', 'Zustand'] },
+    { category: 'UI & 工程化', tags: ['Ant Design', 'Docker', 'GitHub Actions'] },
+    { category: '后端/全栈', tags: ['Java (Spring Boot)'] },
+    { category: '业务领域', tags: ['数据平台开发', '低代码引擎',] }
+  ];
+
+  return (
+    <div style={{ padding: '30px 20px', backgroundColor: '#f6f8fa', minHeight: '100vh' }}>
+      <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+        <h2 style={{ color: '#1a1a1a', fontSize: '22px' }}>杨林森 | 前端开发工程师</h2>
+        <p style={{ color: '#666', fontSize: '14px' }}>2026届秋招预备 · 数据平台方向</p>
       </div>
-    );
-  }
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {techStack.map((item, index) => (
+          <div key={index} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ fontSize: '16px', color: '#007bff', marginBottom: '10px', borderBottom: '1px solid #eee', paddingBottom: '5px' }}>
+              {item.category}
+            </h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {item.tags.map(tag => (
+                <span key={tag} style={{ padding: '4px 10px', backgroundColor: '#e7f3ff', color: '#007bff', borderRadius: '20px', fontSize: '13px', fontWeight: 500 }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p style={{ marginTop: '30px', textAlign: 'center', color: '#999', fontSize: '12px', lineHeight: '1.6' }}>
+        📢 电脑端访问可体验完整“Word Killer”数据大盘与高交互功能
+      </p>
+    </div>
+  );
+}
 
   return (
     <BrowserRouter>
