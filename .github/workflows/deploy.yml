@@ -1,6 +1,5 @@
-name: Deploy Word Killer Admin # 流水线的名字
+name: Deploy Word Killer Admin
 
-# 触发条件：当你把代码 push 到 main 分支时，流水线启动！
 on:
   push:
     branches:
@@ -8,44 +7,50 @@ on:
 
 jobs:
   build-and-deploy:
-    # 白嫖微软的服务器：分配一台最新的 Ubuntu Linux 虚拟机给你用
     runs-on: ubuntu-latest
 
     steps:
-    # [物理步骤 1] 把你 GitHub 上的源代码拉取到这台虚拟机里
     - name: 📦 Checkout Code
       uses: actions/checkout@v3
 
-    # [物理步骤 2] 登录云端集装箱中心 (Docker Hub)
-    - name: 🔑 Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # [物理步骤 3] 极其吃算力的一步：在微软服务器上编译并打包镜像，然后推送到 Docker Hub
-    - name: 🏗️ Build and Push Docker Image
+    # 第 1 步：正常打包构建你的 word 镜像
+    - name: 🏗️ Build Docker Image
       uses: docker/build-push-action@v4
       with:
         context: .
-        push: true
-        # 给你的集装箱贴上标签：你的账号名/项目名:latest
-        tags: ${{ secrets.DOCKER_USERNAME }}/word:latest
+        push: false # 我们不往被墙的 Docker Hub 推了！
+        tags: word:latest
 
-    # [物理步骤 4] 远程操控你的阿里云：登录、清理旧箱子、拉取新箱子、点火运行！
+    # 第 2 步：【核心黑科技】把镜像压缩成一个实体的 .tar 文件包
+    - name: 📦 Save Image to Tar
+      run: docker save word:latest -o word.tar
+
+    # 第 3 步：【核心黑科技】通过刚刚打通的 SSH 隧道，把文件直接扔进阿里云的 /root 目录
+    - name: 🚚 SCP Tar to Aliyun
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.ALIYUN_HOST }}
+        username: ${{ secrets.ALIYUN_USER }}
+        password: ${{ secrets.ALIYUN_PASSWORD }}
+        source: "word.tar"
+        target: "/root/"
+
+    # 第 4 步：远程登录阿里云，解压文件并运行！
     - name: 🚀 Deploy to Aliyun Server
       uses: appleboy/ssh-action@v0.1.10
       with:
-        host: ${{ secrets.ALIYUN_HOST }} # 你的阿里云 IP
-        username: ${{ secrets.ALIYUN_USER }} # 通常是 root
-        password: ${{ secrets.ALIYUN_PASSWORD }} # 服务器密码
+        host: ${{ secrets.ALIYUN_HOST }}
+        username: ${{ secrets.ALIYUN_USER }}
+        password: ${{ secrets.ALIYUN_PASSWORD }}
         script: |
-          # 1. 停止并删除旧的容器（如果存在的话）
-          docker stop word-killer || true
-          docker rm word-killer || true
+          docker stop word-app || true
+          docker rm word-app || true
           
-          # 2. 从云端拉取微软刚刚帮你打包好的最新集装箱
-          docker pull ${{ secrets.DOCKER_USERNAME }}/word-killer-admin:latest
+          # 直接从刚才传过来的实体文件里加载镜像，彻底绕过网络防火墙！
+          docker load -i /root/word.tar
           
-          # 3. 运行新容器！（把你阿里云的 80 端口映射到容器里）
-          docker run -d -p 80:80 --name word-killer ${{ secrets.DOCKER_USERNAME }}/word-killer-admin:latest
+          # 启动容器！
+          docker run -d -p 80:80 --name word-app word:latest
+          
+          # 销毁压缩包，释放你的服务器内存
+          rm -f /root/word.tar
