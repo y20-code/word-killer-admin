@@ -1,0 +1,51 @@
+name: Deploy Word Killer Admin # 流水线的名字
+
+# 触发条件：当你把代码 push 到 main 分支时，流水线启动！
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    # 白嫖微软的服务器：分配一台最新的 Ubuntu Linux 虚拟机给你用
+    runs-on: ubuntu-latest
+
+    steps:
+    # [物理步骤 1] 把你 GitHub 上的源代码拉取到这台虚拟机里
+    - name: 📦 Checkout Code
+      uses: actions/checkout@v3
+
+    # [物理步骤 2] 登录云端集装箱中心 (Docker Hub)
+    - name: 🔑 Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # [物理步骤 3] 极其吃算力的一步：在微软服务器上编译并打包镜像，然后推送到 Docker Hub
+    - name: 🏗️ Build and Push Docker Image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        # 给你的集装箱贴上标签：你的账号名/项目名:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/word-killer-admin:latest
+
+    # [物理步骤 4] 远程操控你的阿里云：登录、清理旧箱子、拉取新箱子、点火运行！
+    - name: 🚀 Deploy to Aliyun Server
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.ALIYUN_HOST }} # 你的阿里云 IP
+        username: ${{ secrets.ALIYUN_USER }} # 通常是 root
+        password: ${{ secrets.ALIYUN_PASSWORD }} # 服务器密码
+        script: |
+          # 1. 停止并删除旧的容器（如果存在的话）
+          docker stop word-killer || true
+          docker rm word-killer || true
+          
+          # 2. 从云端拉取微软刚刚帮你打包好的最新集装箱
+          docker pull ${{ secrets.DOCKER_USERNAME }}/word-killer-admin:latest
+          
+          # 3. 运行新容器！（把你阿里云的 80 端口映射到容器里）
+          docker run -d -p 80:80 --name word-killer ${{ secrets.DOCKER_USERNAME }}/word-killer-admin:latest

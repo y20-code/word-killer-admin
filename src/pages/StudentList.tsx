@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/userStore';
 import { fetchTeacherStudents } from '../api/student';
 
-import StateCard from '../components/statCard';
+import StateCard from '../components/StatCard';
 import './StudentList.scss';
 
 const { Title, Text } = Typography;

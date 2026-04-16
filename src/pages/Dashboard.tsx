@@ -7,7 +7,7 @@ import {
 import { useUserStore } from '../store/userStore';
 import { useNavigate } from 'react-router-dom';
 import { fetchDashboardData } from '../api/dashboard';
-import StatCard from '../components/statCard'
+import StatCard from '../components/StatCard'
 import ClassProgressList from '../components/ClassProgressList';
 import HardWordsCard from '../components/HardWordsCard';
 import './Dashboard.scss';
